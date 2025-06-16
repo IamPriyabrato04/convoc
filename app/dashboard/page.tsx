@@ -1,10 +1,11 @@
-"use client"
+"use client";
+
 import React from 'react'
 
-const Home = () => {
+const page = () => {
   return (
     <div>page</div>
   )
 }
 
-export default Home
+export default page
