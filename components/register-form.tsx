@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { z } from "zod";
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { registerSchema } from "@/schemas"
-import { register } from "@/app/api/login"
 import { useState, useTransition } from "react"
+import { register } from "@/app/api/register"
 
 
 export function RegisterForm() {
@@ -39,12 +39,8 @@ export function RegisterForm() {
         startTransition(() => {
             register(values)
                 .then((data) => {
-                    setSuccess(data.message || "Registration successful!");
-                    setError(""); // Clear any previous error
-                })
-                .catch((error) => {
-                    console.error("Login failed:", error);
-                    setError("Invalid login credentials. Please try again.");
+                    setSuccess(data.success);
+                    setError(data.error); // Clear any previous error
                 });
         });
     };
@@ -106,8 +102,8 @@ export function RegisterForm() {
                         </FormItem>
                     )}
                 />
-                {error && <p className="text-red-500">{error}</p>}
-                {success && <p className="text-green-500">{success}</p>}
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {success && <p className="text-green-500 text-sm">{success}</p>}
                 <Button type="submit" disabled={isPending} >Submit</Button>
             </form>
         </Form>

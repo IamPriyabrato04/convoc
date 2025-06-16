@@ -1,16 +1,36 @@
 "use server"
 
-import * as z from "zod";
+import { z } from "zod";
 import { registerSchema } from "@/schemas";
+import bcrypt from "bcryptjs";
+import { db } from "@/lib/db";
 
-
-export const login = async (values: z.infer<typeof registerSchema>) => {
-    console.log("Login values:", values);
+export const register = async (values: z.infer<typeof registerSchema>) => {
+    console.log("Registration values:", values);
     const valuidatedFields = registerSchema.safeParse(values);
 
     if (!valuidatedFields.success) {
-        return { error: "Invalid login credentials" };
+        return { error: "Invalid credentials" };
     }
 
-    return { message: "Email Sent" };
+    const { name, email, password } = valuidatedFields.data;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const existigUser = await db.user.findUnique({
+        where: { email, }
+    });
+
+    if (existigUser) {
+        return { error: "User already exists" };
+    }
+
+    await db.user.create({
+        data: {
+            name,
+            email,
+            password: hashedPassword,
+        },
+    })
+
+    return { success: "User created" };
 }

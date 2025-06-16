@@ -23,9 +23,9 @@ export default function page() {
                         Enter your email below to login to your account
                     </CardDescription>
                     <CardAction>
-                        <Link href="/register">
+                        <Link href="/login">
                             <Button variant="secondary" className="w-full bg-neutral-700">
-                                Create an account
+                                Login
                             </Button>
                         </Link>
                     </CardAction>

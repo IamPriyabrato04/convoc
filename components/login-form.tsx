@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { z } from "zod";
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { loginSchema } from "@/schemas"
 import { useState, useTransition } from "react"
-import { login } from "@/app/api/register"
+import { login } from "@/app/api/login"
 
 
 export function LoginForm() {
@@ -40,12 +40,8 @@ export function LoginForm() {
         startTransition(() => {
             login(values)
                 .then((data) => {
-                    setSuccess(data.message || "Login successful!");
-                    setError(""); // Clear any previous error
-                })
-                .catch((error: Error) => {
-                    console.error("Login failed:", error);
-                    setError("Invalid login credentials. Please try again.");
+                    if(data?.success) setSuccess(data.success);
+                    else setError(data.error);
                 });
         });
     };
