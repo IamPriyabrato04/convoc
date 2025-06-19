@@ -1,5 +1,6 @@
 "use client"
 import { LoginForm } from "@/components/login-form"
+import OauthButton from "@/components/OauthButton"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -34,12 +35,7 @@ export default function page() {
                     <LoginForm />
                 </CardContent>
                 <CardFooter className="flex flex-row gap-1">
-                    <Button variant="outline" className=" w-1/2">
-                        Login with Google
-                    </Button>
-                    <Button variant="outline" className="w-1/2">
-                        Login with Github
-                    </Button>
+                    <OauthButton />
                 </CardFooter>
             </Card>
         </div>
