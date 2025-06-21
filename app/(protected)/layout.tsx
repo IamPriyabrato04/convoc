@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
             <Navbar />
             <div className="flex text-white">
                 <Sidebar />
-                <section className="flex min-h-screen flex-1 flex-col pb-6 px-6 pt-28 max-md:pb-14 sm:px-14 ">
+                <section className="flex min-h-screen flex-1 flex-col pb-6 px-2 pt-2 max-md:pb-14 sm:px-14 ">
                     <div className="w-full">
                         {children}
                     </div>
