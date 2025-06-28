@@ -58,16 +58,23 @@ model Room {
 }
 
 model RoomParticipant {
-  id       String    @id @default(cuid())
+  id       String            @id @default(cuid())
   userId   String
   roomId   String
-  joinedAt DateTime  @default(now())
+  joinedAt DateTime          @default(now())
   leftAt   DateTime?
-  micOn    Boolean   @default(true)
-  cameraOn Boolean   @default(true)
+  micOn    Boolean           @default(true)
+  cameraOn Boolean           @default(true)
+  status   ParticipantStatus @default(PENDING)
 
   user User @relation(fields: [userId], references: [id])
   room Room @relation(fields: [roomId], references: [id])
+}
+
+enum ParticipantStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 model ChatMessage {
