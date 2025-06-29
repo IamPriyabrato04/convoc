@@ -10,12 +10,7 @@ import {
   VideoOff,
 } from "lucide-react";
 
-
-export default function MeetingSetup({
-  onJoin,
-}: {
-  onJoin: (stream: MediaStream) => void;
-}) {
+export default function MeetingSetup() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [cameraOn, setCameraOn] = useState(true);
@@ -23,7 +18,6 @@ export default function MeetingSetup({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 1. Set up media stream only once
   useEffect(() => {
     const setupMedia = async () => {
       try {
@@ -47,7 +41,6 @@ export default function MeetingSetup({
     };
   }, []);
 
-  // 2. Attach stream to video element when ready
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
@@ -70,25 +63,26 @@ export default function MeetingSetup({
 
   if (loading) {
     return (
-      <div className="text-center p-10 flex items-center justify-center gap-2">
-        <LoaderCircleIcon className="animate-spin h-10 w-10" />
-        Loading camera...
+      <div className="flex flex-col items-center justify-center gap-2 p-10">
+        <LoaderCircleIcon className="animate-spin h-10 w-10 text-blue-500" />
+        <span className="text-gray-600">Loading camera...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border rounded-2xl border-red-500 text-red-500 flex justify-center items-center gap-2 sm:text-4xl">
-        <AlertTriangleIcon size={40} /> {error}
+      <div className="flex items-center justify-center gap-2 text-red-600 p-6 border border-red-500 rounded-lg shadow">
+        <AlertTriangleIcon size={28} />
+        <span>{error}</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center md:flex-row gap-6 w-full h-full sm:gap-y-10">
-      {/* Webcam Preview */}
-      <div className="w-full h-fit md:w-2/3 max-w-lg aspect-video rounded-xl overflow-hidden shadow-lg border-2 border-neutral-400">
+    <div className="flex flex-col md:flex-row gap-8 items-center justify-center w-full h-full px-4">
+      {/* Preview */}
+      <div className="w-full md:w-2/3 max-w-lg aspect-video bg-black rounded-xl overflow-hidden shadow-lg border border-gray-300">
         <video
           ref={videoRef}
           autoPlay
@@ -99,32 +93,30 @@ export default function MeetingSetup({
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col items-center justify-center gap-4 w-full md:w-1/3 max-w-xs">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col items-center gap-4 w-full md:w-1/3">
+        <div className="flex gap-4">
           <button
             onClick={toggleMic}
-            className={`p-3 rounded-full ${
-              micOn ? "bg-gray-500" : "bg-red-600"
-            } text-white shadow-lg`}
+            className={`p-3 rounded-full shadow transition ${micOn ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+              } text-white`}
           >
-            {micOn ? <Mic size={20} /> : <MicOff size={20} />}
+            {micOn ? <Mic size={22} /> : <MicOff size={22} />}
           </button>
 
           <button
             onClick={toggleCamera}
-            className={`p-3 rounded-full ${
-              cameraOn ? "bg-gray-500" : "bg-red-600"
-            } text-white shadow-lg`}
+            className={`p-3 rounded-full shadow transition ${cameraOn ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+              } text-white`}
           >
-            {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
+            {cameraOn ? <Video size={22} /> : <VideoOff size={22} />}
           </button>
         </div>
 
         <button
-          onClick={() => onJoin(stream!)}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg mt-4"
+          onClick={() => { }}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition"
         >
-          Ask to join meeting
+          Ask to join
         </button>
       </div>
     </div>

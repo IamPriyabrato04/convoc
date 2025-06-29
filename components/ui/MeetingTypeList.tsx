@@ -42,12 +42,20 @@ const MeetingTypeList = () => {
         description="View past meetings"
         handleClick={() => router.push("/recordings")}
       />
+       {/* meeting modals */}
       <MeetingModal
         isOpen={meetingState === 'isInstantMeeting'}
         onClose={() => setMeetingState(undefined)}
         title='Start an instant meeting'
         className='text-center'
         buttonText='Start Meeting'
+      />
+      <MeetingModal
+        isOpen={meetingState === 'isJoinMeeting'}
+        onClose={() => setMeetingState(undefined)}
+        title='Join a meeting'
+        className='text-center'
+        buttonText='Join Meeting'
       />
     </section>
   );

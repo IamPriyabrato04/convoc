@@ -1,20 +1,27 @@
+// useMeetingStore.ts
 import { create } from "zustand";
 
-type Participant = {
+export type Participant = {
     id: string;
     userId: string;
     micOn: boolean;
     cameraOn: boolean;
 };
 
-type Message = {
+export type Message = {
     id: string;
     content: string;
     senderId: string;
     timestamp: string;
 };
 
-type MeetingState = {
+export type WaitingParticipant = {
+    id: string;
+    userId: string;
+    userName: string;
+};
+
+export type MeetingState = {
     roomId: string;
     participants: Participant[];
     messages: Message[];
@@ -22,21 +29,22 @@ type MeetingState = {
     localCameraOn: boolean;
     streams: MediaStream[];
     waitingList: WaitingParticipant[];
-    setWaitingList: (list: WaitingParticipant[]) => void;
+
     setRoomId: (id: string) => void;
-    setParticipants: (participants: Participant[]) => void;
+    setParticipants: (p: Participant[]) => void;
     addParticipant: (p: Participant) => void;
     removeParticipant: (id: string) => void;
+
     addMessage: (m: Message) => void;
+
     setLocalMicOn: (on: boolean) => void;
     setLocalCameraOn: (on: boolean) => void;
+
     setStreams: (streams: MediaStream[]) => void;
+
+    setWaitingList: (list: WaitingParticipant[]) => void;
 };
-type WaitingParticipant = {
-    id: string;
-    userId: string;
-    userName: string; // from User model
-};
+
 export const useMeetingStore = create<MeetingState>((set) => ({
     roomId: "",
     participants: [],
@@ -45,15 +53,20 @@ export const useMeetingStore = create<MeetingState>((set) => ({
     localCameraOn: true,
     streams: [],
     waitingList: [],
-    setWaitingList: (list) => set({ waitingList: list }),
+
     setRoomId: (id) => set({ roomId: id }),
     setParticipants: (participants) => set({ participants }),
-    addParticipant: (p) => set((state) => ({ participants: [...state.participants, p] })),
-    removeParticipant: (id) => set((state) => ({
-        participants: state.participants.filter((p) => p.id !== id),
+    addParticipant: (p) => set((s) => ({ participants: [...s.participants, p] })),
+    removeParticipant: (id) => set((s) => ({
+        participants: s.participants.filter((p) => p.id !== id),
     })),
-    addMessage: (m) => set((state) => ({ messages: [...state.messages, m] })),
+
+    addMessage: (m) => set((s) => ({ messages: [...s.messages, m] })),
+
     setLocalMicOn: (on) => set({ localMicOn: on }),
     setLocalCameraOn: (on) => set({ localCameraOn: on }),
+
     setStreams: (streams) => set({ streams }),
+
+    setWaitingList: (waitingList) => set({ waitingList }),
 }));
