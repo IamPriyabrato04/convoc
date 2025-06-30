@@ -7,7 +7,8 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     const userId = session.user.id;
 
     try {
-        const room = await db.room.findUnique({ where: { code: params.code } });
+        const code = params.code;
+        const room = await db.room.findUnique({ where: { code: code } });
         if (!room) return new Response("Room not found", { status: 404 });
 
         const isOwner = room.ownerId === userId;

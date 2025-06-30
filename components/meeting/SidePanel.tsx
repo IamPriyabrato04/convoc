@@ -2,9 +2,9 @@
 
 import { useMeetingStore } from "@/store/useMeetingStore";
 
-
 export default function SidePanel() {
     const participants = useMeetingStore((s) => s.participants);
+
     return (
         <div className="w-80 bg-gray-800 p-4 border-l border-gray-700 overflow-y-auto">
             <h3 className="mb-4 text-lg">Participants ({participants.length})</h3>
@@ -14,7 +14,7 @@ export default function SidePanel() {
                     <span>{p.userId}</span>
                 </div>
             ))}
-            {/* Chat would live below */}
+            {/* You can add chat list below if needed */}
         </div>
     );
 }

@@ -30,34 +30,43 @@ const MeetingModal = ({
   children,
 }: MeetingModalProps) => {
   const [value, setValue] = useState('');
-  const [loading, setLoading] = useState(false); // ⬅️ loader state
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { setRoomId } = useMeetingStore();
 
-  const createMeeting = () => {
-    setLoading(true);
-    fetch("/api/meetings/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: value }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          console.error(data.error);
-          setLoading(false);
-          return;
-        }
-        setRoomId(data.code);
-        router.push(`/meeting/${data.code}`);
-      })
-      .catch((error) => {
-        console.error("Error creating meeting:", error);
-        setLoading(false);
+  const createMeeting = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/meetings/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: value }),
       });
+
+      const data = await res.json();
+
+      if (!data.code) {
+        console.error("Invalid response: missing room code");
+        setLoading(false);
+        return;
+      }
+
+
+      if (data.error) {
+        console.error(data.error);
+        setLoading(false);
+        return;
+      }
+
+      setRoomId(data.code);
+      router.push(`/meeting/${data.code}`);
+    } catch (error) {
+      console.error("Error creating meeting:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const joinMeeting = () => {
     setLoading(true);

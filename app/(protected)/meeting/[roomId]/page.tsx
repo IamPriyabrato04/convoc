@@ -1,112 +1,78 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { connectSocket } from '@/lib/socket';
-import { startMediaFlow, setupConsumerListener } from '@/lib/mediasoupClient';
-import * as mediasoupClient from 'mediasoup-client';
+import { useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useMeetingStore } from "@/store/useMeetingStore";
+import Header from "@/components/meeting/Header";
+import Controls from "@/components/meeting/Controls";
+import SidePanel from "@/components/meeting/SidePanel";
+import VideoStage from "@/components/meeting/VideoStage";
+import { useJoinMeeting } from "@/hooks/useJoinMeeting";
 
-async function getJwtToken(): Promise<string | null> {
-  const res = await fetch("/api/auth/jwt");
-  const data = await res.json();
-  return data.token;
-}
+export default function MeetingRoomPage() {
+  const params = useParams();
+  const router = useRouter();
+  const localVideoRef = useRef<HTMLVideoElement>(null);
 
+  const roomId = params.roomId as string;
+  const { join } = useJoinMeeting(roomId);
 
-export default function RoomPage() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [joined, setJoined] = useState(false);
-  const [remoteStreams, setRemoteStreams] = useState<MediaStream[]>([]);
-  const roomId = useParams().roomId as string;
+  const {
+    setRoomId,
+    setStreams,
+    localMicOn,
+    localCameraOn,
+  } = useMeetingStore();
 
-  const joinMeeting = async () => {
-    const token = await getJwtToken();
-    if (!token) {
-      alert("JWT token missing");
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true;
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.log("navigator.mediaDevices", navigator.mediaDevices);
-      console.log("navigator.mediaDevices.getUserMedia", navigator.mediaDevices?.getUserMedia);
-      console.log("Permissions API supported?", navigator.permissions);
+    const init = async () => {
+      try {
+        setRoomId(roomId);
 
+        // Get local stream
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: localCameraOn,
+          audio: localMicOn,
+        });
 
-      alert("Camera or microphone not supported or permissions denied");
-      return;
-    }
+        if (!isMounted) return;
 
-    const localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
+        setStreams([stream]);
 
-    if (videoRef.current) {
-      // videoRef.current.play();
-      videoRef.current.pause();
-      videoRef.current.srcObject = null;
-      videoRef.current.srcObject = localStream;
-      videoRef.current.play().catch((err) => console.error("Video play error", err));
-    }
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+          localVideoRef.current.muted = true;
+          localVideoRef.current.play().catch((err) => {
+            console.error("Video play error:", err);
+          });
+        }
 
-    console.log("Token:", token);
-    console.log("Room ID:", roomId);
-    await connectSocket({ token, roomId });
+        await join();
+      } catch (err) {
+        console.error("Error joining meeting:", err);
+        router.push("/dashboard");
+      }
+    };
 
-    const device = new mediasoupClient.Device();
-    console.log(device);
+    init();
 
-
-    await startMediaFlow(device, localStream);
-    if (!device.loaded) {
-      alert("Failed to load mediasoup device");
-      return;
-    }
-
-    await setupConsumerListener(device, (stream) => {
-      setRemoteStreams(prev => [...prev, stream]);
-    });
-
-    setJoined(true);
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <main className="h-screen w-full flex flex-col items-center justify-center gap-10 p-4">
-      <p className="text-lg font-semibold">Meeting ID: {roomId}</p>
+    <div className="flex flex-col h-screen bg-neutral-950 text-white">
+      <Header roomId={roomId} />
 
-      <video
-        ref={videoRef}
-        className="w-full max-w-3xl rounded-xl border"
-        autoPlay
-        muted
-        playsInline
-      />
-
-      <div className="flex flex-wrap gap-4 justify-center mt-4">
-        {remoteStreams.map((stream, i) => (
-          <video
-            key={i}
-            className="w-64 h-48 border rounded"
-            autoPlay
-            playsInline
-            ref={(ref) => {
-              if (ref) {
-                ref.srcObject = stream;
-                ref.play();
-              }
-            }}
-          />
-        ))}
+      <div className="flex flex-1 overflow-hidden">
+        <VideoStage localVideoRef={localVideoRef as React.RefObject<HTMLVideoElement>} />
+        <SidePanel />
       </div>
 
-      {!joined && (
-        <button
-          onClick={() => { joinMeeting() }}
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg"
-        >
-          Join Meeting
-        </button>
-      )}
-    </main>
+      <Controls />
+    </div>
   );
 }

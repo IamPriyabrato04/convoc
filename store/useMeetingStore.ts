@@ -1,4 +1,3 @@
-// useMeetingStore.ts
 import { create } from "zustand";
 
 export type Participant = {
@@ -36,6 +35,7 @@ export type MeetingState = {
     removeParticipant: (id: string) => void;
 
     addMessage: (m: Message) => void;
+    setMessages: (messages: Message[]) => void; // ✅ NEW
 
     setLocalMicOn: (on: boolean) => void;
     setLocalCameraOn: (on: boolean) => void;
@@ -43,6 +43,8 @@ export type MeetingState = {
     setStreams: (streams: MediaStream[]) => void;
 
     setWaitingList: (list: WaitingParticipant[]) => void;
+
+    resetMeeting: () => void; // ✅ NEW
 };
 
 export const useMeetingStore = create<MeetingState>((set) => ({
@@ -62,6 +64,7 @@ export const useMeetingStore = create<MeetingState>((set) => ({
     })),
 
     addMessage: (m) => set((s) => ({ messages: [...s.messages, m] })),
+    setMessages: (messages) => set({ messages }), // ✅
 
     setLocalMicOn: (on) => set({ localMicOn: on }),
     setLocalCameraOn: (on) => set({ localCameraOn: on }),
@@ -69,4 +72,15 @@ export const useMeetingStore = create<MeetingState>((set) => ({
     setStreams: (streams) => set({ streams }),
 
     setWaitingList: (waitingList) => set({ waitingList }),
+
+    resetMeeting: () =>
+        set({
+            roomId: "",
+            participants: [],
+            messages: [],
+            localMicOn: true,
+            localCameraOn: true,
+            streams: [],
+            waitingList: [],
+        }), // ✅
 }));
