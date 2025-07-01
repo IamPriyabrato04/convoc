@@ -43,7 +43,7 @@ export default function MeetingRoomPage() {
 
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
-          localVideoRef.current.muted = true;
+          localVideoRef.current.muted = false;
           localVideoRef.current.play().catch((err) => {
             console.error("Video play error:", err);
           });

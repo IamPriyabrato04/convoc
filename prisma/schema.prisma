@@ -2,24 +2,24 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// prisma/schema.prisma
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String            @id @default(cuid())
-  name          String?
-  email         String?           @unique
-  emailVerified DateTime?         @map("email_verified")
-  image         String?
-  password      String?
-  accounts      Account[]
-  roomsOwned    Room[]            @relation("RoomOwner") // Opposite side of Room.owner
-  participants  RoomParticipant[] // Links to RoomParticipant.user
-  messages      ChatMessage[] // Links to ChatMessage.sender
-  files         File[]            @relation("UserFiles") // Links to File.uploadedBy
+  id             String             @id @default(cuid())
+  name           String?
+  email          String?            @unique
+  emailVerified  DateTime?          @map("email_verified")
+  image          String?
+  password       String?
+  messages       ChatMessage[]
+  files          File[]             @relation("UserFiles")
+  roomsOwned     Room[]             @relation("RoomOwner")
+  participants   RoomParticipant[]
+  waitingEntries WaitingListEntry[]
+  accounts       Account[]
 
   @@map("users")
 }
@@ -30,31 +30,31 @@ model Account {
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
 
 model Room {
-  id           String            @id @default(cuid())
-  code         String            @unique
+  id           String             @id @default(cuid())
+  code         String             @unique
   name         String?
-  isActive     Boolean           @default(true)
+  isActive     Boolean            @default(true)
   ownerId      String
-  owner        User              @relation("RoomOwner", fields: [ownerId], references: [id])
-  participants RoomParticipant[]
+  createdAt    DateTime           @default(now())
   chatMessages ChatMessage[]
   files        File[]
-  createdAt    DateTime          @default(now())
+  owner        User               @relation("RoomOwner", fields: [ownerId], references: [id])
+  participants RoomParticipant[]
+  waitingList  WaitingListEntry[]
 }
 
 model RoomParticipant {
@@ -66,15 +66,25 @@ model RoomParticipant {
   micOn    Boolean           @default(true)
   cameraOn Boolean           @default(true)
   status   ParticipantStatus @default(PENDING)
-
-  user User @relation(fields: [userId], references: [id])
-  room Room @relation(fields: [roomId], references: [id])
+  room     Room              @relation(fields: [roomId], references: [id])
+  user     User              @relation(fields: [userId], references: [id])
 }
+
 
 enum ParticipantStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+model WaitingListEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  roomId    String
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model ChatMessage {
@@ -83,9 +93,8 @@ model ChatMessage {
   senderId  String
   roomId    String
   timestamp DateTime @default(now())
-
-  sender User @relation(fields: [senderId], references: [id])
-  room   Room @relation(fields: [roomId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
 }
 
 model File {
@@ -98,7 +107,7 @@ model File {
   uploadedById String
   roomId       String
   uploadedAt   DateTime @default(now())
-
-  uploadedBy User @relation("UserFiles", fields: [uploadedById], references: [id])
-  room       Room @relation(fields: [roomId], references: [id])
+  room         Room     @relation(fields: [roomId], references: [id])
+  uploadedBy   User     @relation("UserFiles", fields: [uploadedById], references: [id])
 }
+

@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
-export async function POST(req: Request, { params }: { params: { code: string } }) {
+
+
+export async function POST(req: Request) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -11,13 +13,12 @@ export async function POST(req: Request, { params }: { params: { code: string } 
 
         await db.roomParticipant.update({
             where: { id: participantId },
-            data: { status: "REJECTED" },
+            data: { status: "ACCEPTED" },
         });
 
         return Response.json({ success: true });
     }
     catch (error) {
-        console.error("Error in rejecting participant:", error);
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        console.error("Error in approving participant:", error);
     }
 }

@@ -70,24 +70,27 @@ const MeetingModal = ({
 
   const joinMeeting = () => {
     setLoading(true);
-    fetch(`/api/meetings/${value}/ask-to-join`, {
+    fetch(`/api/meetings/${value}/request-to-join`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-      }
+      },
     })
       .then((res) => res.json())
       .then((data) => {
         if (!data.success) {
-          console.error(data.message);
+          console.error("Join failed");
           setLoading(false);
           return;
         }
+
         setRoomId(data.code);
 
+        // If owner, directly enter meeting
         if (data.isOwner) {
           router.push(`/meeting/${data.code}`);
         } else {
+          // Otherwise go to waiting page
           router.push(`/meeting/waiting`);
         }
       })
@@ -96,6 +99,7 @@ const MeetingModal = ({
         setLoading(false);
       });
   };
+
 
   return (
     <>

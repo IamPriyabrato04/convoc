@@ -19,7 +19,7 @@ export default function VideoStage({ localVideoRef }: { localVideoRef: RefObject
     );
 
     return (
-        <div className="flex-1 relative p-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div className="flex-1 relative p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {streams.map((stream, i) => (
                 <video
                     key={i}

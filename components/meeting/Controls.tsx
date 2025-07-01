@@ -32,10 +32,10 @@ export default function Controls() {
     };
 
     return (
-        <div className="flex items-center justify-center gap-6 p-4 bg-gray-900">
+        <div className="flex items-center justify-center gap-10 p-2 bg-neutral-900 rounded-2xl border border-neutral-700">
             <Button
                 onClick={toggleMic}
-                className={`p-3 rounded-full transition ${localMicOn ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"
+                className={`p-2 rounded-full transition ${localMicOn ? "bg-neutral-600 hover:bg-neutral-500" : "bg-red-600 hover:bg-red-700"
                     }`}
             >
                 {localMicOn ? <Mic /> : <MicOff />}
@@ -43,13 +43,13 @@ export default function Controls() {
 
             <Button
                 onClick={toggleCamera}
-                className={`p-3 rounded-full transition ${localCameraOn ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"
+                className={`p-2 rounded-full transition ${localCameraOn ? "bg-neutral-600 hover:bg-neutral-500" : "bg-red-600 hover:bg-red-700"
                     }`}
             >
                 {localCameraOn ? <Video /> : <VideoOff />}
             </Button>
 
-            <Button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600 transition">
+            <Button className="p-2 bg-neutral-600 rounded-full hover:bg-neutral-500 transition">
                 <Monitor />
             </Button>
         </div>
