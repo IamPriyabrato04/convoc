@@ -3,7 +3,8 @@ let socket: WebSocket | null = null;
 
 export function connectSocket({ token, roomId }: { token: string; roomId: string }) {
     return new Promise<WebSocket>((resolve, reject) => {
-        socket = new WebSocket(process.env.NEXT_PUBLIC_SFU_URL || 'ws://localhost:3001');
+        socket = new WebSocket(`ws://${process.env.NEXT_PUBLIC_IP}:3001`);
+        console.log(process.env.NEXT_PUBLIC_IP);
 
         socket.onopen = () => {
             socket?.send(JSON.stringify({ type: 'join', token, roomId }));
