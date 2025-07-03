@@ -3,8 +3,13 @@ let socket: WebSocket | null = null;
 
 export function connectSocket({ token, roomId }: { token: string; roomId: string }) {
     return new Promise<WebSocket>((resolve, reject) => {
-        socket = new WebSocket(`ws://${process.env.NEXT_PUBLIC_IP}:3001`);
-        console.log(process.env.NEXT_PUBLIC_IP);
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+        if (!socketUrl) {
+            reject(new Error('NEXT_PUBLIC_SOCKET_URL is not defined'));
+            return;
+        }
+        socket = new WebSocket(socketUrl);
+        console.log(socketUrl);
 
         socket.onopen = () => {
             socket?.send(JSON.stringify({ type: 'join', token, roomId }));

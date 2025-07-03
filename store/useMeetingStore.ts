@@ -30,7 +30,7 @@ export type MeetingState = {
     streams: MediaStream[];
     waitingList: WaitingParticipant[];
     allowedToJoin: boolean;
-
+    pinnedStreamId: string | null;
 
     setRoomId: (id: string) => void;
     setParticipants: (p: Participant[]) => void;
@@ -44,11 +44,15 @@ export type MeetingState = {
     setLocalCameraOn: (on: boolean) => void;
 
     setStreams: (streams: MediaStream[]) => void;
+    addStream: (stream: MediaStream) => void;
+    removeStream: (id: string) => void;
 
     setWaitingList: (list: WaitingParticipant[]) => void;
 
     resetMeeting: () => void;
     setAllowedToJoin: (allowed: boolean) => void;
+
+    setPinnedStreamId: (id: string | null) => void;
 };
 
 export const useMeetingStore = create<MeetingState>()(
@@ -61,6 +65,8 @@ export const useMeetingStore = create<MeetingState>()(
             localCameraOn: true,
             streams: [],
             waitingList: [],
+            allowedToJoin: false,
+            pinnedStreamId: null,
 
             setRoomId: (id) => set({ roomId: id }),
             setParticipants: (participants) => set({ participants }),
@@ -79,6 +85,12 @@ export const useMeetingStore = create<MeetingState>()(
             setLocalCameraOn: (on) => set({ localCameraOn: on }),
 
             setStreams: (streams) => set({ streams }),
+            addStream: (stream) =>
+                set((s) => ({ streams: [...s.streams, stream] })),
+            removeStream: (id) =>
+                set((s) => ({
+                    streams: s.streams.filter((str) => str.id !== id),
+                })),
 
             setWaitingList: (waitingList) => set({ waitingList }),
 
@@ -91,12 +103,16 @@ export const useMeetingStore = create<MeetingState>()(
                     localCameraOn: true,
                     streams: [],
                     waitingList: [],
+                    allowedToJoin: false,
+                    pinnedStreamId: null,
                 }),
-            allowedToJoin: false,
+
             setAllowedToJoin: (allowed) => set({ allowedToJoin: allowed }),
+
+            setPinnedStreamId: (id) => set({ pinnedStreamId: id }),
         }),
         {
-            name: "meeting-storage", // Key in localStorage
+            name: "meeting-storage",
             partialize: (state) => ({
                 roomId: state.roomId,
                 localMicOn: state.localMicOn,

@@ -15,7 +15,11 @@ export default function MeetingRoomPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
 
   const roomId = params.roomId as string;
-  const { join } = useJoinMeeting(roomId);
+  const {
+    join,
+    remoteStreams,
+    // localVideoRef: joinedLocalRef,
+  } = useJoinMeeting(roomId);
 
   const {
     setRoomId,
@@ -39,8 +43,10 @@ export default function MeetingRoomPage() {
 
         if (!isMounted) return;
 
+        // Set initial local stream
         setStreams([stream]);
 
+        // Update local video element
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
           localVideoRef.current.muted = false;
@@ -62,6 +68,20 @@ export default function MeetingRoomPage() {
       isMounted = false;
     };
   }, []);
+
+  /**
+   * 🔥 Watch remoteStreams from useJoinMeeting and combine with local
+   */
+  useEffect(() => {
+    const currentStreams = useMeetingStore.getState().streams;
+    const localStream = currentStreams.find(
+      (s) => s.getVideoTracks().length > 0 || s.getAudioTracks().length > 0
+    );
+
+    const updatedStreams = localStream ? [localStream, ...remoteStreams] : [...remoteStreams];
+
+    setStreams(updatedStreams);
+  }, [remoteStreams]);
 
   return (
     <div className="flex flex-col h-screen bg-neutral-950 text-white">

@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import * as mediasoupClient from "mediasoup-client";
-import { connectSocket } from "@/lib/socket";
-import { setupConsumerListener, startMediaFlow } from "@/lib/mediasoupClient";
+import { connectSocket, getSocket } from "@/lib/socket";
+import { startMediaFlow } from "@/lib/mediasoupClient";
 
 async function getJwtToken(): Promise<string | null> {
     const res = await fetch("/api/auth/jwt");
@@ -23,23 +23,15 @@ export function useJoinMeeting(roomId: string) {
             return;
         }
 
-        if (!navigator.mediaDevices?.getUserMedia) {
-            console.log("navigator.mediaDevices", navigator.mediaDevices);
-            console.log("navigator.mediaDevices.getUserMedia", navigator.mediaDevices?.getUserMedia);
-            alert("Camera or microphone not supported or permissions denied");
-            return;
-        }
-
         const localStream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true,
         });
 
         if (localVideoRef.current) {
-            localVideoRef.current.pause();
-            localVideoRef.current.srcObject = null;
             localVideoRef.current.srcObject = localStream;
-            localVideoRef.current.play().catch((err) => console.error("Video play error", err));
+            localVideoRef.current.muted = true;
+            await localVideoRef.current.play();
         }
 
         await connectSocket({ token, roomId });
@@ -47,14 +39,53 @@ export function useJoinMeeting(roomId: string) {
         const device = new mediasoupClient.Device();
         await startMediaFlow(device, localStream);
 
-        if (!device.loaded) {
-            alert("Failed to load mediasoup device");
-            return;
-        }
+        const socket = getSocket();
 
-        await setupConsumerListener(device, (stream) => {
-            setRemoteStreams((prev) => [...prev, stream]);
+        let recvTransport: mediasoupClient.types.Transport | null = null;
+
+        socket.addEventListener("message", async (event) => {
+            const msg = JSON.parse(event.data);
+
+            if (msg.type === "transportCreated" && msg.data.direction === "recv") {
+                recvTransport = device.createRecvTransport(msg.data);
+
+                recvTransport.on("connect", ({ dtlsParameters }, callback) => {
+                    socket.send(JSON.stringify({
+                        type: "connectTransport",
+                        data: { dtlsParameters, direction: "recv" }
+                    }));
+                    callback();
+                });
+            }
+
+            if (msg.type === "newProducer" && recvTransport) {
+                const { producerId } = msg.data;
+
+                socket.send(JSON.stringify({
+                    type: "consume",
+                    data: { producerId, rtpCapabilities: device.rtpCapabilities }
+                }));
+            }
+
+            if (msg.type === "consumed" && recvTransport) {
+                const { id, producerId, kind, rtpParameters } = msg.data;
+
+                const consumer = await recvTransport.consume({
+                    id,
+                    producerId,
+                    kind,
+                    rtpParameters,
+                });
+
+                const stream = new MediaStream([consumer.track]);
+                setRemoteStreams((prev) => [...prev, stream]);
+
+                await consumer.resume();
+            }
         });
+
+        // Create recv transport request
+        socket.send(JSON.stringify({ type: "createWebRtcTransport", data: { direction: "recv" } }));
 
         setJoined(true);
     };

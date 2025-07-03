@@ -1,118 +1,86 @@
-import * as mediasoupClient from 'mediasoup-client';
-import { getSocket } from './socket';
+import * as mediasoupClient from "mediasoup-client";
+import { getSocket } from "./socket";
 
 export async function startMediaFlow(device: mediasoupClient.Device, stream: MediaStream) {
     const socket = getSocket();
 
-    return new Promise(async (resolve) => {
-        // 1. Get router capabilities
-        socket.send(JSON.stringify({ type: 'getRouterRtpCapabilities' }));
+    // Step 1: Get router RTP capabilities
+    socket.send(JSON.stringify({ type: "getRouterRtpCapabilities" }));
 
-        socket.onmessage = async (event) => {
+    return new Promise<void>((resolve) => {
+        const handleMessage = async (event: MessageEvent) => {
             const msg = JSON.parse(event.data);
 
-            if (msg.type === 'routerRtpCapabilities') {
+            if (msg.type === "routerRtpCapabilities") {
                 await device.load({ routerRtpCapabilities: msg.data });
 
-                // ✅ Create send transport first
-                socket.send(JSON.stringify({ type: 'createWebRtcTransport', data: { direction: 'send' } }));
+                socket.send(JSON.stringify({ type: "createWebRtcTransport", data: { direction: "send" } }));
             }
 
-            if (msg.type === 'transportCreated') {
-                // ✅ Create send transport
+            if (msg.type === "transportCreated" && msg.data.direction === undefined) {
+                // First transportCreated is for send
                 const sendTransport = device.createSendTransport(msg.data);
 
-                sendTransport.on('connect', ({ dtlsParameters }, callback) => {
-                    socket.send(JSON.stringify({
-                        type: 'connectTransport',
-                        data: { dtlsParameters, direction: 'send' }
-                    }));
-                    socket.onmessage = () => callback();
+                sendTransport.on("connect", ({ dtlsParameters }, callback) => {
+                    socket.send(JSON.stringify({ type: "connectTransport", data: { dtlsParameters, direction: "send" } }));
+                    callback();
                 });
 
-                sendTransport.on('produce', ({ kind, rtpParameters }, callback) => {
-                    socket.send(JSON.stringify({
-                        type: 'produce',
-                        data: { kind, rtpParameters }
-                    }));
-
-                    socket.onmessage = (event) => {
+                sendTransport.on("produce", ({ kind, rtpParameters }, callback) => {
+                    socket.send(JSON.stringify({ type: "produce", data: { kind, rtpParameters } }));
+                    const onProduced = (event: MessageEvent) => {
                         const res = JSON.parse(event.data);
-                        if (res.type === 'produced') callback({ id: res.data.id });
+                        if (res.type === "produced") {
+                            callback({ id: res.data.id });
+                            socket.removeEventListener("message", onProduced);
+                        }
                     };
+                    socket.addEventListener("message", onProduced);
                 });
 
                 for (const track of stream.getTracks()) {
                     await sendTransport.produce({ track });
                 }
 
-                resolve(true);
+                socket.removeEventListener("message", handleMessage);
+                resolve();
             }
         };
+
+        socket.addEventListener("message", handleMessage);
     });
 }
 
 export async function setupConsumerListener(
     device: mediasoupClient.Device,
+    recvTransport: mediasoupClient.types.Transport,
     addStream: (stream: MediaStream) => void
 ) {
     const socket = getSocket();
 
-    socket.addEventListener('message', async (event) => {
+    socket.addEventListener("message", async (event) => {
         const msg = JSON.parse(event.data);
 
-        if (msg.type === 'newProducer') {
+        if (msg.type === "newProducer") {
             const { producerId } = msg.data;
 
-            // ✅ Create recv transport before consume
-            socket.send(JSON.stringify({ type: 'createWebRtcTransport', data: { direction: 'recv' } }));
+            socket.send(JSON.stringify({ type: "consume", data: { producerId, rtpCapabilities: device.rtpCapabilities } }));
+        }
 
-            socket.onmessage = async (event) => {
-                const res = JSON.parse(event.data);
-                if (res.type === 'transportCreated') {
-                    const recvTransport = device.createRecvTransport(res.data);
+        if (msg.type === "consumed") {
+            const { id, producerId, kind, rtpParameters } = msg.data;
 
-                    recvTransport.on('connect', ({ dtlsParameters }, callback) => {
-                        socket.send(JSON.stringify({
-                            type: 'connectTransport',
-                            data: { dtlsParameters, direction: 'recv' }
-                        }));
-                        callback();
-                    });
+            const consumer = await recvTransport.consume({
+                id,
+                producerId,
+                kind,
+                rtpParameters,
+            });
 
-                    // Once transport is ready, request to consume
-                    socket.send(JSON.stringify({
-                        type: 'consume',
-                        data: {
-                            producerId,
-                            rtpCapabilities: device.rtpCapabilities
-                        }
-                    }));
+            const stream = new MediaStream([consumer.track]);
+            addStream(stream);
 
-                    // Listen for consumed
-                    socket.onmessage = async (event) => {
-                        const consumeMsg = JSON.parse(event.data);
-                        if (consumeMsg.type === 'consumed') {
-                            const {
-                                id,
-                                producerId,
-                                kind,
-                                rtpParameters,
-                            } = consumeMsg.data;
-
-                            const consumer = await recvTransport.consume({
-                                id,
-                                producerId,
-                                kind,
-                                rtpParameters,
-                            });
-
-                            const stream = new MediaStream([consumer.track]);
-                            addStream(stream);
-                        }
-                    };
-                }
-            };
+            await consumer.resume();
         }
     });
 }
