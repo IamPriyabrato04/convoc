@@ -30,7 +30,7 @@ export function useJoinMeeting(roomId: string) {
 
         if (localVideoRef.current) {
             localVideoRef.current.srcObject = localStream;
-            localVideoRef.current.muted = true;
+            localVideoRef.current.muted = false;
             await localVideoRef.current.play();
         }
 

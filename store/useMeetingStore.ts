@@ -1,123 +1,56 @@
+// store/useMeetingStore.ts
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
-export type Participant = {
+export enum ParticipantStatusEnum {
+    PENDING = "PENDING",
+    ACCEPTED = "ACCEPTED",
+    REJECTED = "REJECTED",
+}
+
+type User = {
+    id: string;
+    name?: string;
+    email?: string;
+    image?: string;
+};
+
+type Participant = {
     id: string;
     userId: string;
     micOn: boolean;
     cameraOn: boolean;
+    status: ParticipantStatusEnum;
+    user: User;
 };
 
-export type Message = {
-    id: string;
-    content: string;
-    senderId: string;
-    timestamp: string;
-};
-
-export type WaitingParticipant = {
-    id: string;
-    userId: string;
-    userName: string;
-};
-
-export type MeetingState = {
-    roomId: string;
+interface MeetingState {
+    roomId: string | null;
+    ownerId: string | null;
     participants: Participant[];
-    messages: Message[];
-    localMicOn: boolean;
-    localCameraOn: boolean;
-    streams: MediaStream[];
-    waitingList: WaitingParticipant[];
-    allowedToJoin: boolean;
-    pinnedStreamId: string | null;
+    waitingList: User[];
+    chatMessages: [];
+    files: [];
+    isOwner: boolean;
 
     setRoomId: (id: string) => void;
+    setOwnerId: (id: string) => void;
     setParticipants: (p: Participant[]) => void;
-    addParticipant: (p: Participant) => void;
-    removeParticipant: (id: string) => void;
+    setWaitingList: (w: User[]) => void;
+    setIsOwner: (f: boolean) => void;
+}
 
-    addMessage: (m: Message) => void;
-    setMessages: (messages: Message[]) => void;
+export const useMeetingStore = create<MeetingState>((set) => ({
+    roomId: null,
+    ownerId: null,
+    participants: [],
+    waitingList: [],
+    chatMessages: [],
+    files: [],
+    isOwner: false,
 
-    setLocalMicOn: (on: boolean) => void;
-    setLocalCameraOn: (on: boolean) => void;
-
-    setStreams: (streams: MediaStream[]) => void;
-    addStream: (stream: MediaStream) => void;
-    removeStream: (id: string) => void;
-
-    setWaitingList: (list: WaitingParticipant[]) => void;
-
-    resetMeeting: () => void;
-    setAllowedToJoin: (allowed: boolean) => void;
-
-    setPinnedStreamId: (id: string | null) => void;
-};
-
-export const useMeetingStore = create<MeetingState>()(
-    persist(
-        (set) => ({
-            roomId: "",
-            participants: [],
-            messages: [],
-            localMicOn: true,
-            localCameraOn: true,
-            streams: [],
-            waitingList: [],
-            allowedToJoin: false,
-            pinnedStreamId: null,
-
-            setRoomId: (id) => set({ roomId: id }),
-            setParticipants: (participants) => set({ participants }),
-            addParticipant: (p) =>
-                set((s) => ({ participants: [...s.participants, p] })),
-            removeParticipant: (id) =>
-                set((s) => ({
-                    participants: s.participants.filter((p) => p.id !== id),
-                })),
-
-            addMessage: (m) =>
-                set((s) => ({ messages: [...s.messages, m] })),
-            setMessages: (messages) => set({ messages }),
-
-            setLocalMicOn: (on) => set({ localMicOn: on }),
-            setLocalCameraOn: (on) => set({ localCameraOn: on }),
-
-            setStreams: (streams) => set({ streams }),
-            addStream: (stream) =>
-                set((s) => ({ streams: [...s.streams, stream] })),
-            removeStream: (id) =>
-                set((s) => ({
-                    streams: s.streams.filter((str) => str.id !== id),
-                })),
-
-            setWaitingList: (waitingList) => set({ waitingList }),
-
-            resetMeeting: () =>
-                set({
-                    roomId: "",
-                    participants: [],
-                    messages: [],
-                    localMicOn: true,
-                    localCameraOn: true,
-                    streams: [],
-                    waitingList: [],
-                    allowedToJoin: false,
-                    pinnedStreamId: null,
-                }),
-
-            setAllowedToJoin: (allowed) => set({ allowedToJoin: allowed }),
-
-            setPinnedStreamId: (id) => set({ pinnedStreamId: id }),
-        }),
-        {
-            name: "meeting-storage",
-            partialize: (state) => ({
-                roomId: state.roomId,
-                localMicOn: state.localMicOn,
-                localCameraOn: state.localCameraOn,
-            }),
-        }
-    )
-);
+    setRoomId: (id) => set({ roomId: id }),
+    setOwnerId: (id) => set({ ownerId: id }),
+    setParticipants: (p) => set({ participants: p }),
+    setWaitingList: (w) => set({ waitingList: w }),
+    setIsOwner: (f) => set({ isOwner: f }),
+}));

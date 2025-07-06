@@ -2,18 +2,25 @@
 
 import Navbar from "@/components/ui/navbar";
 import Sidebar from "@/components/ui/sidebar";
+import { useUserStore } from "@/store/useUserStore";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function ConditionalLayoutClient({
     children,
     user,
 }: {
     children: React.ReactNode;
-    user?: any;
+    user: { id: string; name: string; email: string; image: string };
 }) {
     const pathname = usePathname();
     const isMeetingPage = pathname?.startsWith("/meeting/");
+
+    const setUser = useUserStore((s) => s.setUser);
+
+    useEffect(() => {
+        setUser(user);
+    }, [user]);
 
     return (
         <>

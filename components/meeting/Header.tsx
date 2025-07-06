@@ -1,31 +1,71 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { LogOutIcon, CopyIcon } from "lucide-react";
+import ChatSection from "./Chat-Section";
 import { Button } from "../ui/button";
-import { LogOutIcon } from "lucide-react";
-import { useLeaveMeeting } from "@/hooks/useLeaveMeeting";
-import { useMeetingStore } from "@/store/useMeetingStore";
+import { useDisconnectButton } from "@livekit/components-react";
 
 export default function Header({ roomId }: { roomId: string }) {
-    const { leave } = useLeaveMeeting();
-    const { setRoomId, setStreams } = useMeetingStore();
+    const [copied, setCopied] = useState(false);
+    const router = useRouter();
 
-    const handleLeave = async () => {
-        await leave();
-        setRoomId("");
-        setStreams([]);
+    // Setup LiveKit's disconnect button hook with stopTracks true
+    const { buttonProps } = useDisconnectButton({ stopTracks: true });
+
+    const { stopTracks, ...cleanProps } = buttonProps;
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(roomId);
+            setCopied(true);
+            toast.success("Room ID copied!");
+            setTimeout(() => setCopied(false), 1500);
+        } catch (err) {
+            console.error("Failed to copy:", err);
+            toast.error("Failed to copy Room ID");
+        }
     };
 
     return (
-        <div className="flex items-center justify-between rounded-2xl bg-neutral-900 px-6 py-1 w-full">
-            <div className="flex items-center gap-2">
-                <h2 className="text-lg font-medium">Meeting ID:</h2>
-                <span className="text-md opacity-60">{roomId}</span>
+        <div
+            className="
+        flex flex-col sm:flex-row sm:items-center sm:justify-between
+        gap-3 sm:gap-0
+        rounded-2xl bg-neutral-900/60 backdrop-blur-md shadow-lg
+        px-4 py-3 w-full border border-neutral-700
+      "
+        >
+            <div className="flex flex-wrap items-center gap-2 overflow-hidden">
+                <h2 className="text-base sm:text-lg font-medium">Meeting ID:</h2>
+                <span className="text-sm sm:text-md opacity-70 truncate max-w-[150px] sm:max-w-none">
+                    {roomId}
+                </span>
+
+                <button
+                    onClick={handleCopy}
+                    className="
+            flex items-center justify-center p-1 rounded 
+            hover:bg-neutral-700 transition relative
+          "
+                >
+                    <CopyIcon
+                        className={`w-4 h-4 transition-transform duration-300 ${copied ? "scale-125 text-green-500" : ""}`}
+                    />
+                </button>
             </div>
+
+            <ChatSection />
+
             <Button
-                onClick={handleLeave}
-                className="px-4 bg-red-400 rounded-2xl hover:bg-red-700 transition cursor-pointer"
+                {...cleanProps}
+                className="px-4 py-2 bg-red-500 rounded-2xl hover:bg-red-700 transition text-sm sm:text-base flex items-center" onClick={() => {
+                    router.push("/dashboard");
+                }}
             >
-                Leave <LogOutIcon />
+                Leave <LogOutIcon className="ml-1 h-4 w-4" />
             </Button>
         </div>
     );

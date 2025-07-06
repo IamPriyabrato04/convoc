@@ -9,9 +9,20 @@ export default async function DashboardLayout({
 }) {
     const session = await auth();
 
+    if (!session?.user) {
+        // redirect("/auth/login"); or return <p>Unauthorized</p>
+    }
+
+    const user = {
+        id: session?.user?.id,
+        name: session?.user?.name,
+        email: session?.user?.email,
+        image: session?.user?.image,
+    };
+
     return (
         <main className="relative">
-            <ConditionalLayoutClient user={session?.user}>
+            <ConditionalLayoutClient user={user}>
                 {children}
             </ConditionalLayoutClient>
         </main>

@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
 import { useRouter } from "next/navigation";
-import { useMeetingStore } from "@/store/useMeetingStore";
 import Loader from "@/app/(protected)/meeting/[roomId]/loading";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface MeetingModalProps {
   isOpen: boolean;
@@ -32,7 +32,6 @@ const MeetingModal = ({
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { setRoomId } = useMeetingStore();
 
   const createMeeting = async () => {
     try {
@@ -58,7 +57,6 @@ const MeetingModal = ({
         return;
       }
 
-      setRoomId(data.code);
       router.push(`/meeting/${data.code}`);
     } catch (error) {
       console.error("Error creating meeting:", error);
@@ -84,8 +82,6 @@ const MeetingModal = ({
           return;
         }
 
-        setRoomId(data.code);
-
         // If owner, directly enter meeting
         if (data.isOwner) {
           router.push(`/meeting/${data.code}`);
@@ -93,7 +89,9 @@ const MeetingModal = ({
           // Otherwise go to waiting page
           router.push(`/meeting/waiting`);
         }
+        setLoading(false);
       })
+
       .catch((error) => {
         console.error("Error joining meeting:", error);
         setLoading(false);
@@ -105,6 +103,7 @@ const MeetingModal = ({
     <>
       {loading && <Loader />} {/* ⬅️ Show loader */}
       <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogTitle></DialogTitle>
         <DialogContent className="flex w-full max-w-[520px] flex-col gap-6 border-none bg-neutral-900 text-white px-6 py-9">
           <div className="flex flex-col gap-6">
             <h1 className={cn('text-3xl font-bold leading-[42px]', className)}>{title}</h1>

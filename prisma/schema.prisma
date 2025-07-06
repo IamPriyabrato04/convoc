@@ -70,13 +70,6 @@ model RoomParticipant {
   user     User              @relation(fields: [userId], references: [id])
 }
 
-
-enum ParticipantStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-
 model WaitingListEntry {
   id        String   @id @default(cuid())
   userId    String
@@ -111,3 +104,8 @@ model File {
   uploadedBy   User     @relation("UserFiles", fields: [uploadedById], references: [id])
 }
 
+enum ParticipantStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}

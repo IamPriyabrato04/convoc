@@ -1,52 +1,58 @@
 "use client";
 
-import { useMeetingStore } from "@/store/useMeetingStore";
 import { Mic, MicOff, Video, VideoOff, Monitor } from "lucide-react";
 import { Button } from "../ui/button";
+import {
+    useTrackToggle,
+    useLocalParticipant,
+} from "@livekit/components-react";
 
 export default function Controls() {
     const {
-        localMicOn,
-        localCameraOn,
-        setLocalMicOn,
-        setLocalCameraOn,
-        streams,
-    } = useMeetingStore();
+        isMicrophoneEnabled,
+        isCameraEnabled,
+        microphoneTrack,
+        cameraTrack,
+    } = useLocalParticipant();
 
-    const toggleMic = () => {
-        setLocalMicOn(!localMicOn);
-        const stream = streams[0];
-        if (stream) {
-            const audioTrack = stream.getAudioTracks()[0];
-            if (audioTrack) audioTrack.enabled = !localMicOn;
-        }
-    };
-
-    const toggleCamera = () => {
-        setLocalCameraOn(!localCameraOn);
-        const stream = streams[0];
-        if (stream) {
-            const videoTrack = stream.getVideoTracks()[0];
-            if (videoTrack) videoTrack.enabled = !localCameraOn;
-        }
-    };
+    // Fix: explicitly ensure undefined if no track
+    const { toggle: toggleMic, buttonProps: micButtonProps } = useTrackToggle(
+        microphoneTrack ?? undefined
+    );
+    const { toggle: toggleCam, buttonProps: camButtonProps } = useTrackToggle(
+        cameraTrack ?? undefined
+    );
 
     return (
-        <div className="flex items-center justify-center gap-10 p-2 bg-neutral-900 rounded-2xl border border-neutral-700">
+        <div
+            className="
+        flex items-center justify-center gap-6 p-3 
+        bg-neutral-900/60 backdrop-blur-lg rounded-2xl border border-neutral-700
+        shadow-xl transition-all
+      "
+        >
             <Button
-                onClick={toggleMic}
-                className={`p-2 rounded-full transition ${localMicOn ? "bg-neutral-600 hover:bg-neutral-500" : "bg-red-600 hover:bg-red-700"
+                {...micButtonProps}
+                onClick={(e) => {
+                    e.preventDefault();
+                    toggleMic();
+                }}
+                className={`p-2 rounded-full transition ${isMicrophoneEnabled ? "bg-neutral-600 hover:bg-neutral-500" : "bg-red-600 hover:bg-red-700"
                     }`}
             >
-                {localMicOn ? <Mic /> : <MicOff />}
+                {isMicrophoneEnabled ? <Mic /> : <MicOff />}
             </Button>
 
             <Button
-                onClick={toggleCamera}
-                className={`p-2 rounded-full transition ${localCameraOn ? "bg-neutral-600 hover:bg-neutral-500" : "bg-red-600 hover:bg-red-700"
+                {...camButtonProps}
+                onClick={(e) => {
+                    e.preventDefault();
+                    toggleCam();
+                }}
+                className={`p-2 rounded-full transition ${isCameraEnabled ? "bg-neutral-600 hover:bg-neutral-500" : "bg-red-600 hover:bg-red-700"
                     }`}
             >
-                {localCameraOn ? <Video /> : <VideoOff />}
+                {isCameraEnabled ? <Video /> : <VideoOff />}
             </Button>
 
             <Button className="p-2 bg-neutral-600 rounded-full hover:bg-neutral-500 transition">

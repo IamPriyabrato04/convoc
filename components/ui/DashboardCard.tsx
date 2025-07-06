@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { LucideIcon, PlusIcon, UserRoundPlus } from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
 import React from 'react'
 
 interface HomeCardProps{

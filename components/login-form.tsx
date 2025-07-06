@@ -40,7 +40,10 @@ export function LoginForm() {
         startTransition(() => {
             login(values)
                 .then((data) => {
-                    if(data?.success) setSuccess(data.success);
+                    if (data?.success) {
+                        setSuccess(data.success);
+                        
+                    }
                     else setError(data.error);
                 });
         });
