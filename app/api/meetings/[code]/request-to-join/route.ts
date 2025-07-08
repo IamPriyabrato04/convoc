@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
             return Response.json({ error: "Unauthorized" }, { status: 401 });
         }
         const userId = session.user.id;
-        
+
         const { code } = await params;
         const room = await db.room.findUnique({ where: { code: code } });
         if (!room) {
@@ -25,7 +25,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
             return Response.json({
                 success: true,
                 isOwner: room.ownerId === userId,
-                code: params.code,
+                code: code,
             });
         }
 
@@ -43,7 +43,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
         return Response.json({
             success: true,
             isOwner: room.ownerId === userId,
-            code: params.code,
+            code: code,
         });
     }
     catch (error) {

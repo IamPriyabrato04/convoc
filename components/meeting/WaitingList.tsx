@@ -1,19 +1,52 @@
-import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckIcon, XIcon, Loader2Icon } from "lucide-react";
+"use client";
 
-export default function WaitingList({ roomId, isOwner }: { roomId: string, isOwner: boolean }) {
-    const [pendingList, setPendingList] = useState<any[]>([]);
+import { useEffect, useState } from "react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Loader2, Check, X, Users } from "lucide-react";
+
+type UserType = {
+    id: string;
+    name?: string;
+    email?: string;
+    image?: string;
+};
+
+type ParticipantType = {
+    id: string;
+    user: UserType;
+};
+
+export default function WaitingList({
+    roomId,
+    isOwner,
+}: {
+    roomId: string;
+    isOwner: boolean;
+}) {
+    const [pendingList, setPendingList] = useState<ParticipantType[]>([]);
     const [loadingId, setLoadingId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isOwner) return;
 
         const fetchPending = async () => {
-            const res = await fetch(`/api/meetings/${roomId}/pending`);
-            const data = await res.json();
-            setPendingList(data.participants || []);
+            try {
+                const res = await fetch(`/api/meetings/${roomId}/pending`);
+                const data = await res.json();
+                if (data.participants) {
+                    setPendingList(data.participants);
+                } else {
+                    setPendingList([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch pending participants:", error);
+            }
         };
 
         fetchPending();
@@ -24,68 +57,98 @@ export default function WaitingList({ roomId, isOwner }: { roomId: string, isOwn
 
     const approve = async (id: string) => {
         setLoadingId(id);
-        await fetch(`/api/meetings/${roomId}/approve`, {
-            method: "POST",
-            body: JSON.stringify({ participantId: id }),
-        });
+        try {
+            await fetch(`/api/meetings/${roomId}/approve`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ participantId: id }),
+            });
+        } catch (error) {
+            console.error("Failed to approve participant:", error);
+        }
         setLoadingId(null);
     };
 
     const reject = async (id: string) => {
         setLoadingId(id);
-        await fetch(`/api/meetings/${roomId}/reject`, {
-            method: "POST",
-            body: JSON.stringify({ participantId: id }),
-        });
+        try {
+            await fetch(`/api/meetings/${roomId}/reject`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ participantId: id }),
+            });
+        } catch (error) {
+            console.error("Failed to reject participant:", error);
+        }
         setLoadingId(null);
     };
 
     if (!isOwner) return null;
 
     return (
-        <div>
-            <h3 className="text-2xl font-bold mb-2">Waiting List</h3>
-            <ScrollArea className="h-[200px] max-w-[320px] rounded-md border p-2">
-                {pendingList.length === 0 ? (
-                    <p className="text-gray-400 text-sm">No pending requests</p>
-                ) : (
-                    pendingList.map((p) => {
-                        const isLoading = loadingId === p.id;
-                        return (
-                            <div
-                                key={p.id}
-                                className="flex items-center justify-between bg-neutral-900 border border-neutral-700 p-1 rounded-md mb-1 min-h-[40px]"
-                            >
-                                {isLoading ? (
-                                    <div className="flex justify-center items-center w-full">
-                                        <Loader2Icon className="w-5 h-5 animate-spin text-white" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <span className="text-sm text-white">{p.user.name}</span>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                onClick={() => approve(p.id)}
-                                                size="icon"
-                                                className="bg-green-500 rounded-full hover:bg-green-700"
-                                            >
-                                                <CheckIcon className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                onClick={() => reject(p.id)}
-                                                size="icon"
-                                                className="bg-red-500 rounded-full hover:bg-red-700"
-                                            >
-                                                <XIcon className="w-4 h-4" />
-                                            </Button>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    className="flex items-center gap-1 text-white hover:bg-neutral-700 transition"
+                >
+                    <Users className="w-5 h-5" />
+                    <span>Waiting List</span>
+                </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+                className="bg-neutral-900 border border-neutral-700 w-80 p-2"
+                align="end"
+            >
+                <h3 className="text-lg font-bold text-white mb-2">
+                    Waiting List ({pendingList.length})
+                </h3>
+
+                <ScrollArea className="h-[300px] rounded-md border border-neutral-700 p-1 bg-neutral-800">
+                    {pendingList.length === 0 ? (
+                        <p className="text-gray-400 text-sm text-center">No pending requests</p>
+                    ) : (
+                        pendingList.map((p) => {
+                            const isLoading = loadingId === p.id;
+                            return (
+                                <div
+                                    key={p.id}
+                                    className="flex items-center justify-between bg-neutral-900 border border-neutral-700 p-2 rounded-md mb-1"
+                                >
+                                    {isLoading ? (
+                                        <div className="flex justify-center items-center w-full">
+                                            <Loader2 className="w-5 h-5 animate-spin text-white" />
                                         </div>
-                                    </>
-                                )}
-                            </div>
-                        );
-                    })
-                )}
-            </ScrollArea>
-        </div>
+                                    ) : (
+                                        <>
+                                            <span className="text-sm text-white">
+                                                {p.user?.name || p.user?.email || "Unknown"}
+                                            </span>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    onClick={() => approve(p.id)}
+                                                    size="icon"
+                                                    className="bg-green-500 rounded-full hover:bg-green-700"
+                                                >
+                                                    <Check className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    onClick={() => reject(p.id)}
+                                                    size="icon"
+                                                    className="bg-red-500 rounded-full hover:bg-red-700"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })
+                    )}
+                </ScrollArea>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

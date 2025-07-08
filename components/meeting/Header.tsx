@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LogOutIcon, CopyIcon } from "lucide-react";
 import ChatSection from "./Chat-Section";
@@ -10,7 +9,6 @@ import { useDisconnectButton } from "@livekit/components-react";
 
 export default function Header({ roomId }: { roomId: string }) {
     const [copied, setCopied] = useState(false);
-    const router = useRouter();
 
     // Setup LiveKit's disconnect button hook with stopTracks true
     const { buttonProps } = useDisconnectButton({ stopTracks: true });
@@ -35,11 +33,11 @@ export default function Header({ roomId }: { roomId: string }) {
         flex flex-col sm:flex-row sm:items-center sm:justify-between
         gap-3 sm:gap-0
         rounded-2xl bg-neutral-900/60 backdrop-blur-md shadow-lg
-        px-4 py-3 w-full border border-neutral-700
+        px-4 w-full border border-neutral-700
       "
         >
-            <div className="flex flex-wrap items-center gap-2 overflow-hidden">
-                <h2 className="text-base sm:text-lg font-medium">Meeting ID:</h2>
+            <div className="flex flex-wrap items-center gap-3 overflow-hidden">
+                <h2 className="text-base sm:text-lg font-medium">Meeting ID :</h2>
                 <span className="text-sm sm:text-md opacity-70 truncate max-w-[150px] sm:max-w-none">
                     {roomId}
                 </span>
@@ -61,8 +59,9 @@ export default function Header({ roomId }: { roomId: string }) {
 
             <Button
                 {...cleanProps}
-                className="px-4 py-2 bg-red-500 rounded-2xl hover:bg-red-700 transition text-sm sm:text-base flex items-center" onClick={() => {
-                    router.push("/dashboard");
+                className="px-4 py-2 bg-red-500 rounded-2xl hover:bg-red-700 transition text-sm sm:text-base flex items-center cursor-pointer" onClick={() => {
+                    console.log("Disconnecting from room...");
+                    window.location.href = "/dashboard";
                 }}
             >
                 Leave <LogOutIcon className="ml-1 h-4 w-4" />

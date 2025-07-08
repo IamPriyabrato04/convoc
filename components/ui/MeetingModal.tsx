@@ -9,6 +9,7 @@ import { Input } from "./input";
 import { useRouter } from "next/navigation";
 import Loader from "@/app/(protected)/meeting/[roomId]/loading";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { useMeetingStore } from "@/store/useMeetingStore";
 
 interface MeetingModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const MeetingModal = ({
 }: MeetingModalProps) => {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setIsOwner, setRoomId, setOwnerId, setAllowedToJoin } = useMeetingStore();
   const router = useRouter();
 
   const createMeeting = async () => {
@@ -56,6 +58,10 @@ const MeetingModal = ({
         setLoading(false);
         return;
       }
+      setRoomId(data.code); // Set room ID in store
+      setOwnerId(data.userId); // Set owner ID in store
+      setIsOwner(true); // Set owner state
+      setAllowedToJoin(true); // Allow joining
 
       router.push(`/meeting/${data.code}`);
     } catch (error) {
@@ -84,9 +90,15 @@ const MeetingModal = ({
 
         // If owner, directly enter meeting
         if (data.isOwner) {
+          setRoomId(data.code); // Set room ID in store
+          setOwnerId(data.userId); // Set owner ID in store
+          setIsOwner(true); // Set owner state
+          setAllowedToJoin(true);
           router.push(`/meeting/${data.code}`);
         } else {
           // Otherwise go to waiting page
+          setRoomId(data.code); // Set room ID in store
+          setIsOwner(false); // Set owner state
           router.push(`/meeting/waiting`);
         }
         setLoading(false);

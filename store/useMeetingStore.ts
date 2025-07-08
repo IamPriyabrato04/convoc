@@ -1,4 +1,3 @@
-// store/useMeetingStore.ts
 import { create } from "zustand";
 
 export enum ParticipantStatusEnum {
@@ -28,29 +27,70 @@ interface MeetingState {
     ownerId: string | null;
     participants: Participant[];
     waitingList: User[];
-    chatMessages: [];
-    files: [];
+    chatMessages: []; // update later as needed
+    files: []; // update later as needed
     isOwner: boolean;
+    allowedToJoin: boolean;
 
-    setRoomId: (id: string) => void;
-    setOwnerId: (id: string) => void;
+    setRoomId: (id: string | null) => void;
+    setOwnerId: (id: string | null) => void;
     setParticipants: (p: Participant[]) => void;
     setWaitingList: (w: User[]) => void;
     setIsOwner: (f: boolean) => void;
+    setAllowedToJoin: (a: boolean) => void;
 }
 
+// Read persisted values
+const getInitialRoomId = () => {
+    if (typeof window !== "undefined") {
+        return localStorage.getItem("roomId");
+    }
+    return null;
+};
+
+const getInitialIsOwner = () => {
+    if (typeof window !== "undefined") {
+        return localStorage.getItem("isOwner") === "true";
+    }
+    return false;
+};
+
 export const useMeetingStore = create<MeetingState>((set) => ({
-    roomId: null,
+    roomId: getInitialRoomId(),
     ownerId: null,
     participants: [],
     waitingList: [],
     chatMessages: [],
     files: [],
-    isOwner: false,
+    isOwner: getInitialIsOwner(),
+    allowedToJoin: false,
 
-    setRoomId: (id) => set({ roomId: id }),
+    setRoomId: (id) => {
+        if (typeof window !== "undefined") {
+            if (id) {
+                localStorage.setItem("roomId", id);
+            } else {
+                localStorage.removeItem("roomId");
+            }
+        }
+        set({ roomId: id });
+    },
+
     setOwnerId: (id) => set({ ownerId: id }),
+
     setParticipants: (p) => set({ participants: p }),
+
     setWaitingList: (w) => set({ waitingList: w }),
-    setIsOwner: (f) => set({ isOwner: f }),
+
+    setIsOwner: (f) => {
+        if (typeof window !== "undefined") {
+            localStorage.setItem("isOwner", String(f));
+        }
+        set({ isOwner: f });
+    },
+
+    setAllowedToJoin: (a) => {
+        localStorage.setItem("allowedToJoin", String(a));
+        set({ allowedToJoin: a })
+    },
 }));

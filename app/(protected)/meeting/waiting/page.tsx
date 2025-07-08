@@ -1,46 +1,67 @@
 "use client";
 
-import { useJoinMeeting } from "@/hooks/useJoinMeeting";
 import { useMeetingStore } from "@/store/useMeetingStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function WaitingPage() {
-
-    const { allowedToJoin, setAllowedToJoin, roomId, setRoomId } = useMeetingStore();
-    const { join } = useJoinMeeting(roomId);
+    const { roomId, setRoomId, setAllowedToJoin } = useMeetingStore();
     const router = useRouter();
 
     useEffect(() => {
-        if (!roomId) return;
+        let savedRoomId = roomId;
+        console.log("Restoring roomId from localStorage:", savedRoomId);
 
-        const interval = setInterval(async () => {
-            const res = await fetch(`/api/meetings/${roomId}/status`);
-            const data = await res.json();
-            if (data.status === "ACCEPTED") {
-                setAllowedToJoin(true);
-                clearInterval(interval);
-                router.push(`/meeting/${roomId}`);
-
-            } else if (data.status === "PENDING") {
-                setAllowedToJoin(false);
-
-            } else if (data.status === "REJECTED") {
-                alert("Request was denied by host");
-                clearInterval(interval);
-                setRoomId("");
-                setAllowedToJoin(false);
+        if (!roomId) {
+            savedRoomId = localStorage.getItem("roomId") || null;
+            if (savedRoomId) {
+                setRoomId(savedRoomId);
+            } else {
+                router.push("/dashboard");
+                return;
             }
-        }, 2000);
+        } else {
+            localStorage.setItem("roomId", roomId);
+        }
+
+        const checkStatus = async () => {
+            try {
+                const res = await fetch(`/api/meetings/${savedRoomId}/status`);
+                const data = await res.json();
+                console.log("Checking status for room:", savedRoomId, "Response:", data);
+                if (!data || !data.status) {
+                    console.error("Invalid response format", data);
+                    return;
+                }
+                
+
+                if (data.status === "ACCEPTED") {
+                    clearInterval(interval);
+                    setAllowedToJoin(true);
+                    router.push(`/meeting/${savedRoomId}`);
+                } else if (data.status === "PENDING") {
+                    console.log("Still pending...");
+                } else if (data.status === "REJECTED") {
+                    alert("Request was denied by host");
+                    clearInterval(interval);
+                    setRoomId("");
+                    localStorage.removeItem("roomId");
+                    router.push("/dashboard");
+                }
+            } catch (error) {
+                console.error("Error checking status", error);
+            }
+        };
+
+        const interval = setInterval(checkStatus, 2000);
+        checkStatus();
 
         return () => clearInterval(interval);
-    }, [roomId]);
+    }, []);
 
-    useEffect(() => {
-        if (allowedToJoin) {
-            join();
-        }
-    }, [allowedToJoin]);
-
-    return <div className="text-white text-2xl font-bold flex justify-center items-center h-screen">Waiting for host to approve...</div>;
+    return (
+        <div className="text-white text-2xl font-bold flex justify-center items-center h-screen">
+            Waiting for host to approve <span className="animate-pulse">...</span>
+        </div>
+    );
 }
