@@ -1,4 +1,3 @@
-
 import { auth } from "@/auth";
 import ConditionalLayoutClient from "./ConditionalLayoutClient";
 
@@ -10,14 +9,16 @@ export default async function DashboardLayout({
     const session = await auth();
 
     if (!session?.user) {
-        // redirect("/auth/login"); or return <p>Unauthorized</p>
+        // You might want to redirect or show a fallback here
+        // redirect("/auth/login");
+        // return <p>Unauthorized</p>;
     }
 
     const user = {
-        id: session?.user?.id,
-        name: session?.user?.name,
-        email: session?.user?.email,
-        image: session?.user?.image,
+        id: session?.user?.id ?? "",
+        name: session?.user?.name ?? "",
+        email: session?.user?.email ?? "",
+        image: session?.user?.image ?? "",
     };
 
     return (

@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
+export const runtime = "nodejs";
+
 export async function GET() {
     const session = await auth();
 

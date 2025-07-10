@@ -1,8 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
-
-
 export async function POST(req: Request) {
     try {
         const session = await auth();

@@ -1,15 +1,20 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
-export async function GET(req: Request, { params }: { params: { code: string } }) {
+export const runtime = "nodejs";
+
+export async function GET(req: Request) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
             return Response.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const url = new URL(req.url);
+        const code = url.pathname.split("/")[3];
+
         const userId = session.user.id;
-        const { code } = await params;
+        
         const room = await db.room.findUnique({ where: { code } });
 
         if (!room) {

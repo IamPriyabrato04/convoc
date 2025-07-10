@@ -5,6 +5,8 @@ import { registerSchema } from "@/schemas";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 
+
+
 export const register = async (values: z.infer<typeof registerSchema>) => {
     console.log("Registration values:", values);
     const valuidatedFields = registerSchema.safeParse(values);

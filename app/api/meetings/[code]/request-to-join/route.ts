@@ -1,8 +1,9 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
+export const runtime = "nodejs";
 
-export async function POST(req: Request, { params }: { params: { code: string } }) {
+export async function POST(req: Request) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -10,7 +11,11 @@ export async function POST(req: Request, { params }: { params: { code: string } 
         }
         const userId = session.user.id;
 
-        const { code } = await params;
+        const url = new URL(req.url);
+        const code = url.pathname.split("/")[3];
+        console.log("Request to join room with code:", code);
+        
+
         const room = await db.room.findUnique({ where: { code: code } });
         if (!room) {
             return Response.json({ error: "Room not found" }, { status: 404 });

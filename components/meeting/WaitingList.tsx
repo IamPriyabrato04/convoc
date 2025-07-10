@@ -102,7 +102,7 @@ export default function WaitingList({
                 align="end"
             >
                 <h3 className="text-lg font-bold text-white mb-2">
-                    Waiting List ({pendingList.length}) 
+                    Waiting List ({pendingList.length})
                 </h3>
 
                 <ScrollArea className="h-[300px] rounded-md border border-neutral-700 p-1 bg-neutral-800">
