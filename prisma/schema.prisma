@@ -50,6 +50,8 @@ model Room {
   isActive     Boolean            @default(true)
   ownerId      String
   createdAt    DateTime           @default(now())
+  description  String?
+  scheduledAt  DateTime?
   chatMessages ChatMessage[]
   files        File[]
   owner        User               @relation("RoomOwner", fields: [ownerId], references: [id])

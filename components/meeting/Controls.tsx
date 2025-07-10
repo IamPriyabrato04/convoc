@@ -10,7 +10,7 @@ export default function Controls() {
     return (
         <div
             className="
-        flex w-full justify-center items-center gap-4 p-3
+        flex w-full justify-center items-center gap-4
         bg-neutral-900/60 backdrop-blur-md border border-neutral-700
         rounded-xl shadow-lg
       "

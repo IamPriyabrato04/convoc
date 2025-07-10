@@ -1,12 +1,9 @@
 "use client";
 
 import { useParticipants, useLocalParticipant } from "@livekit/components-react";
-import WaitingList from "./WaitingList";
-import { useMeetingStore } from "@/store/useMeetingStore";
 import Image from "next/image";
 
 export default function SidePanel() {
-    const { roomId, isOwner } = useMeetingStore();
     const participants = useParticipants();
     const { localParticipant } = useLocalParticipant();
 
@@ -43,9 +40,7 @@ export default function SidePanel() {
                 })
             }
 
-            {isOwner && roomId && (
-                <WaitingList roomId={roomId} isOwner={isOwner} />
-            )}
+            
         </div>
     );
 }

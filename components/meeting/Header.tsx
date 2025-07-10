@@ -6,9 +6,13 @@ import { LogOutIcon, CopyIcon } from "lucide-react";
 import ChatSection from "./Chat-Section";
 import { Button } from "../ui/button";
 import { useDisconnectButton } from "@livekit/components-react";
+import WaitingList from "./WaitingList";
+import { useMeetingStore } from "@/store/useMeetingStore";
 
 export default function Header({ roomId }: { roomId: string }) {
     const [copied, setCopied] = useState(false);
+    const { isOwner } = useMeetingStore();
+
 
     // Setup LiveKit's disconnect button hook with stopTracks true
     const { buttonProps } = useDisconnectButton({ stopTracks: true });
@@ -54,12 +58,15 @@ export default function Header({ roomId }: { roomId: string }) {
                     />
                 </button>
             </div>
+            {isOwner && roomId && (
+                <WaitingList roomId={roomId} isOwner={isOwner} />
+            )}
 
             <ChatSection />
 
             <Button
                 {...cleanProps}
-                className="px-4 py-2 bg-red-500 rounded-2xl hover:bg-red-700 transition text-sm sm:text-base flex items-center cursor-pointer" onClick={() => {
+                className="px-4 bg-glass bg-red-500 rounded-2xl hover:bg-red-700 transition text-sm sm:text-base flex items-center cursor-pointer" onClick={() => {
                     console.log("Disconnecting from room...");
                     window.location.href = "/dashboard";
                 }}

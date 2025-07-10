@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, Users } from "lucide-react";
+import { Loader2, Check, X, Users, ChevronDown } from "lucide-react";
 
 type UserType = {
     id: string;
@@ -90,19 +90,19 @@ export default function WaitingList({
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
-                    className="flex items-center gap-1 text-white hover:bg-neutral-700 transition"
+                    className="flex items-center border border-neutral-600 rounded-3xl gap-1 text-white hover:bg-neutral-700 transition w-fit"
                 >
                     <Users className="w-5 h-5" />
-                    <span>Waiting List</span>
+                    <span>Waiting List </span><ChevronDown className="w-5 h-5 border border-amber-100 rounded-full" />
                 </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
-                className="bg-neutral-900 border border-neutral-700 w-80 p-2"
+                className="bg-neutral-900 border border-neutral-300 w-80"
                 align="end"
             >
                 <h3 className="text-lg font-bold text-white mb-2">
-                    Waiting List ({pendingList.length})
+                    Waiting List ({pendingList.length}) 
                 </h3>
 
                 <ScrollArea className="h-[300px] rounded-md border border-neutral-700 p-1 bg-neutral-800">
