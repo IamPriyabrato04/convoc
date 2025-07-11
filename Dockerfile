@@ -1,39 +1,36 @@
-# Stage 1: Install deps and build
+# Stage 1: Builder
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy and install deps first (better layer caching)
+# Install dependencies first
 COPY package.json package-lock.json* ./
 RUN npm install
 
-# Explicitly copy prisma first
-COPY prisma ./prisma
-
-# Now copy rest of code
+# Copy rest of code (this includes prisma!)
 COPY . .
+
+# Debug: ensure prisma exists
+RUN ls -R prisma
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build Next.js app
+# Build
 RUN npm run build
 
-# Stage 2: Production image
+# Stage 2: Runner
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy build artifacts and needed files
 COPY --from=builder /app/.next .next
 COPY --from=builder /app/public public
 COPY --from=builder /app/package.json package.json
 COPY --from=builder /app/node_modules node_modules
-COPY --from=builder /app/prisma prisma  # This will now exist for sure!
+COPY --from=builder /app/prisma prisma
 
-# Expose and set port
 EXPOSE 8080
 ENV PORT=8080
 
-# Run
 CMD ["npm", "start"]
