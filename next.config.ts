@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "photosnow.org",
       },
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me',
+      },
     ],
   },
   output: "standalone",

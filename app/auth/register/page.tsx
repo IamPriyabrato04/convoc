@@ -1,4 +1,5 @@
 "use client"
+import OauthButton from "@/components/OauthButton"
 import { RegisterForm } from "@/components/register-form"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,12 +35,7 @@ export default function page() {
                     <RegisterForm />
                 </CardContent>
                 <CardFooter className="flex flex-row gap-1">
-                    <Button variant="outline" className=" w-1/2">
-                        continue with Google
-                    </Button>
-                    <Button variant="outline" className="w-1/2">
-                        continue with Github
-                    </Button>
+                    <OauthButton />
                 </CardFooter>
             </Card>
         </div>
