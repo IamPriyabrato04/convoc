@@ -57,6 +57,13 @@ const MeetingTypeList = () => {
         className='text-center'
         buttonText='Join Meeting'
       />
+      <MeetingModal
+        isOpen={meetingState === 'isScheduleMeeting'}
+        onClose={() => setMeetingState(undefined)}
+        title='Schedule a meeting'
+        className='text-center'
+        buttonText='Schedule Meeting'
+      />
     </section>
   );
 };
