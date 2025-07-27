@@ -102,7 +102,6 @@ const MeetingModal = ({
       const data = await res.json()
 
       if (!data.success) {
-        console.error("Join failed")
         return
       }
 
@@ -137,13 +136,11 @@ const MeetingModal = ({
 
       const data = await res.json()
       if (!data.success) {
-        console.error(data.error || "Failed to schedule")
         return
       }
 
       setMeetingCode(data.room.code)
       setSuccessDialog(true)
-      onClose()
     } catch (error) {
       console.error("Error scheduling meeting:", error)
     } finally {
@@ -157,7 +154,7 @@ const MeetingModal = ({
     else if (buttonText === "Schedule Meeting") scheduleMeeting()
     else handleClick?.()
 
-    if (buttonText !== "Schedule Meeting") onClose()
+    // if (buttonText !== "Schedule Meeting") onClose()
   }
 
   return (

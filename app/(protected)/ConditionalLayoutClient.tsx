@@ -27,8 +27,8 @@ export default function ConditionalLayoutClient({
             {!isMeetingPage && <Navbar user={user} />}
             <div className="flex text-white">
                 {!isMeetingPage && <Sidebar />}
-                <section className="flex min-h-screen flex-1 flex-col pb-6 px-2 pt-2 max-md:pb-14 sm:px-14 ">
-                    <div className="w-full">{children}</div>
+                <section className="flex min-h-screen flex-1 flex-col max-md:pb-14 sm:px-14 ">
+                    <div>{children}</div>
                 </section>
             </div>
         </>

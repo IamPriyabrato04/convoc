@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   description: "A modern, open-source, and video conferenceing web application",
   keywords: [
     "Convoc",
+    "video call",
     "video conferencing",
     "self-hosted",
     "open-source",
