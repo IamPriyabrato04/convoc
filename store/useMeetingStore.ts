@@ -20,6 +20,22 @@ type Participant = {
     cameraOn: boolean;
     status: ParticipantStatusEnum;
     user: User;
+    isPinned: boolean;
+    isHost?: boolean;
+};
+
+type ChatMessage = {
+    id: string;
+    userId: string;
+    userName: string;
+    message: string;
+    timestamp: Date;
+};
+
+type MeetingFile = {
+    id: string;
+    name: string;
+    url: string;
 };
 
 interface MeetingState {
@@ -27,20 +43,30 @@ interface MeetingState {
     ownerId: string | null;
     participants: Participant[];
     waitingList: User[];
-    chatMessages: []; // update later as needed
-    files: []; // update later as needed
+    chatMessages: ChatMessage[];
+    files: MeetingFile[];
     isOwner: boolean;
     allowedToJoin: boolean;
 
+    // Derived values
+    pinnedParticipants: Participant[];
+    participantCount: number;
+    chatMessageCount: number;
+
+    // Actions
     setRoomId: (id: string | null) => void;
     setOwnerId: (id: string | null) => void;
     setParticipants: (p: Participant[]) => void;
+    setChatMessage: (message: ChatMessage) => void;
+    togglePinParticipant: (id: string) => void;
     setWaitingList: (w: User[]) => void;
     setIsOwner: (f: boolean) => void;
     setAllowedToJoin: (a: boolean) => void;
+
+    // Reset everything
+    reset: () => void;
 }
 
-// Read persisted values
 const getInitialRoomId = () => {
     if (typeof window !== "undefined") {
         return localStorage.getItem("roomId");
@@ -55,7 +81,7 @@ const getInitialIsOwner = () => {
     return false;
 };
 
-export const useMeetingStore = create<MeetingState>((set) => ({
+export const useMeetingStore = create<MeetingState>((set, get) => ({
     roomId: getInitialRoomId(),
     ownerId: null,
     participants: [],
@@ -64,6 +90,18 @@ export const useMeetingStore = create<MeetingState>((set) => ({
     files: [],
     isOwner: getInitialIsOwner(),
     allowedToJoin: false,
+
+    get pinnedParticipants() {
+        return get().participants.filter((p) => p.isPinned);
+    },
+
+    get participantCount() {
+        return get().participants.length;
+    },
+
+    get chatMessageCount() {
+        return get().chatMessages.length;
+    },
 
     setRoomId: (id) => {
         if (typeof window !== "undefined") {
@@ -78,7 +116,43 @@ export const useMeetingStore = create<MeetingState>((set) => ({
 
     setOwnerId: (id) => set({ ownerId: id }),
 
-    setParticipants: (p) => set({ participants: p }),
+    setParticipants: (p) => {
+        // Ensure max 4 pinned
+        const pinned = p.filter((p) => p.isPinned);
+        if (pinned.length > 4) {
+            // Auto unpin extras
+            let count = 0;
+            const updated = p.map((participant) => {
+                if (participant.isPinned && count < 4) {
+                    count++;
+                    return participant;
+                }
+                return { ...participant, isPinned: false };
+            });
+            set({ participants: updated });
+        } else {
+            set({ participants: p });
+        }
+    },
+
+    togglePinParticipant: (id) => {
+        const participants = get().participants;
+        const pinnedCount = participants.filter(p => p.isPinned).length;
+        const updated = participants.map(p => {
+            if (p.id === id) {
+                if (p.isPinned) return { ...p, isPinned: false };
+                return pinnedCount < 4 ? { ...p, isPinned: true } : p;
+            }
+            return p;
+        });
+        set({ participants: updated });
+    },
+
+    setChatMessage: (message) => {
+        set((state) => ({
+            chatMessages: [...state.chatMessages, message],
+        }));
+    },
 
     setWaitingList: (w) => set({ waitingList: w }),
 
@@ -90,7 +164,23 @@ export const useMeetingStore = create<MeetingState>((set) => ({
     },
 
     setAllowedToJoin: (a) => {
-        localStorage.setItem("allowedToJoin", String(a));
-        set({ allowedToJoin: a })
+        if (typeof window !== "undefined") {
+            localStorage.setItem("allowedToJoin", String(a));
+        }
+        set({ allowedToJoin: a });
     },
-}));
+
+    reset: () =>
+        set({
+            roomId: null,
+            ownerId: null,
+            isOwner: false,
+            allowedToJoin: false,
+            participants: [],
+            waitingList: [],
+            chatMessages: [],
+            files: [],
+        })
+    })
+    
+);

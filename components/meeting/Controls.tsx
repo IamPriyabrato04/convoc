@@ -27,7 +27,7 @@ export default function Controls() {
     if (isMobile) {
         return (
             <div className="bg-transparent border border-neutral-700 px-4 py-1">
-                <div className="space-y-3">
+                <div className="space-y-1">
                     {/* Top row - Mobile toggles */}
                     <div className="flex items-center justify-center gap-4">
                         <Button
@@ -78,31 +78,23 @@ export default function Controls() {
 
     // Desktop layout
     return (
-        <div className="bg-transparent border border-neutral-700 px-6 py-1 w-fit mx-auto rounded-lg">
+        <div className="bg-transparent border border-neutral-700 px-2 py-1 w-fit m-auto rounded-xl">
             <div className="flex items-center justify-center gap-8">
                 <TrackToggle
                     source={Track.Source.Microphone}
-                    className="p-2 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
+                    className="p-3 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
                     showIcon
                 />
                 <TrackToggle
                     source={Track.Source.Camera}
-                    className="p-2 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
+                    className="p-3 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
                     showIcon
                 />
                 <TrackToggle
                     source={Track.Source.ScreenShare}
-                    className="p-2 rounded-full transition bg-yellow-600 hover:bg-yellow-700"
+                    className="p-3 rounded-full transition bg-yellow-600 hover:bg-yellow-700"
                     showIcon
                 />
-
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    className="rounded-full w-12 h-12 hover:bg-neutral-700 text-neutral-400"
-                >
-                    <MoreHorizontal className="w-5 h-5" />
-                </Button>
 
                 <Button
                     variant="secondary"
@@ -110,22 +102,6 @@ export default function Controls() {
                     className="rounded-full w-12 h-12 hover:bg-neutral-700 text-neutral-400"
                 >
                     <Hand className="w-5 h-5" />
-                </Button>
-
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    className="rounded-full w-12 h-12 hover:bg-neutral-700 text-neutral-400"
-                >
-                    <MessageSquare className="w-5 h-5" />
-                </Button>
-
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    className="rounded-full w-12 h-12 hover:bg-neutral-700 text-neutral-400"
-                >
-                    <Settings className="w-5 h-5" />
                 </Button>
 
                 <DisconnectButton className="p-2 rounded-full bg-red-600 hover:bg-red-700 transition">

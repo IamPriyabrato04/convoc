@@ -1,54 +1,59 @@
 "use client";
 
 import {
-    ParticipantTile,
+    AudioTrack,
+    TrackRefContext,
     useTracks,
+    VideoTrack,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
-import { useState } from "react";
+import { TrackReference } from "@livekit/components-core";
+import React from "react";
+import Controls from "./Controls";
 
 export default function VideoStage() {
-    // Get all camera tracks
-    const tracks = useTracks(
-        [
-            { source: Track.Source.Camera, withPlaceholder: false },
-            { source: Track.Source.ScreenShare, withPlaceholder: false },
-        ],
-        { onlySubscribed: false }
+    const cameraTracks = useTracks([Track.Source.Camera]).filter(
+        (t): t is TrackReference =>
+            !!t.publication && t.publication.kind === "video"
     );
 
-    // State to hold currently pinned participant identity
-    const [pinnedTrackSid, setPinnedTrackSid] = useState<string | null>(null);
-
-    // Find pinned track object
-    const pinnedTrack = tracks.find((t) => t.participant.identity === pinnedTrackSid) || tracks[0];
-
-    // Filter out pinned track from sidebar list
-    const sidebarTracks = tracks.filter((t) => t.participant.identity !== pinnedTrack?.participant.identity);
+    // Define grid classes based on number of participants
+    const getGridClass = (count: number) => {
+        if (count <= 1) return "grid-cols-1";
+        if (count <= 2) return "grid-cols-1 sm:grid-cols-2";
+        if (count <= 4) return "grid-cols-2 sm:grid-cols-2 md:grid-cols-2";
+        if (count <= 6) return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3";
+        return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4";
+    };
 
     return (
-        <div className="flex h-fit w-fit bg-neutral-900">
-            {/* Center large pinned video */}
-            <div className="flex-1 flex items-center justify-center bg-black relative rounded-lg overflow-hidden">
-                {pinnedTrack ? (
-                    <ParticipantTile trackRef={pinnedTrack} />
-                ) : (
-                    <div className="text-white">No active video</div>
-                )}
-            </div>
-
-            {/* Right sidebar with other participants */}
-            <div className="w-48 flex flex-col gap-1 p-1">
-                {sidebarTracks.map((track) => (
-                    <div
-                        key={track.participant.sid}
-                        onClick={() => setPinnedTrackSid(track.participant.identity)}
-                        className="cursor-pointer rounded-lg overflow-hidden border border-neutral-700 hover:border-blue-500 transition-all"
-                    >
-                        <ParticipantTile trackRef={track} />
-                    </div>
+        <div className="w-full overflow-y-hidden bg-black">
+            <div className={`grid gap-2 ${getGridClass(cameraTracks.length)} z-1`}
+                style={{ maxHeight: "74vh" }}
+            >
+                {cameraTracks.map((trackRef, idx) => (
+                    <ParticipantTile key={idx} trackRef={trackRef} />
                 ))}
             </div>
+            <div className="absolute z-10 border border-red-800 hidden hover:visible">
+                <Controls />
+            </div>
+        </div>
+    );
+}
+
+// each participant's video-tile
+function ParticipantTile({ trackRef }: { trackRef: TrackReference }) {
+    return (
+        <div className="relative w-full rounded-lg bg-gray-800 overflow-hidden shadow-lg">
+            <TrackRefContext.Provider value={trackRef}>
+                {trackRef.publication.kind === "video" && (
+                    <VideoTrack trackRef={trackRef} />
+                )}
+                {trackRef.publication.kind === "audio" && (
+                    <AudioTrack trackRef={trackRef} />
+                )}
+            </TrackRefContext.Provider>
         </div>
     );
 }
