@@ -8,9 +8,9 @@ import VideoStage from "@/components/meeting/VideoStage";
 import { Loader2 } from "lucide-react";
 import { useMeetingStore } from "@/store/useMeetingStore";
 import { useUserStore } from "@/store/useUserStore";
-import Controls from "@/components/meeting/Controls";
 import SidePanel from "@/components/meeting/SidePanel";
-import ChatSection from "@/components/meeting/Chat-Section";
+import SummaryPanel from "@/components/meeting/SummaryPannel";
+import SkeletonLoader from "@/components/SkeletonLoader";
 
 export default function MeetingRoomPage() {
   const { id: userId } = useUserStore();
@@ -56,7 +56,7 @@ export default function MeetingRoomPage() {
         const res = await fetch(`/api/livekit-token?room=${roomId}&userId=${userId}`);
         const data = await res.json();
         console.log("LiveKit token response:", data);
-        
+
         if (!data.token) {
           console.error("Failed to fetch LiveKit token");
           return router.push("/dashboard");
@@ -103,7 +103,7 @@ export default function MeetingRoomPage() {
   if (!token) {
     return (
       <div className="flex items-center justify-center h-screen bg-neutral-950 text-white">
-        <Loader2 className="h-10 w-10 animate-spin" /> Loading...
+        <SkeletonLoader />
       </div>
     );
   }
@@ -114,17 +114,22 @@ export default function MeetingRoomPage() {
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
       connect
       onDisconnected={() => router.push("/dashboard")}
-      video
-      audio
+      audio={true} video={true}
     >
-      <div className="flex flex-col h-screen bg-neutral-950 text-white gap-1.5">
+      <div className="h-screen bg-neutral-950 flex flex-col overflow-hidden border border-neutral-600 rounded-md">
         <Header roomId={roomId} />
-        <div className="flex flex-1 overflow-hidden relative">
-          <VideoStage />
+        {/* Main Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Video Area */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 p-2 md:p-4">
+              <VideoStage />
+            </div>
+
+            <SummaryPanel />
+          </div>
           <SidePanel />
-          <ChatSection />
         </div>
-        <Controls />
       </div>
     </LiveKitRoom>
   );
