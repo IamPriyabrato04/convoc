@@ -10,8 +10,6 @@ import {
     MessageSquare,
     Phone,
     Hand,
-    Settings,
-    MoreHorizontal,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,14 +24,14 @@ export default function Controls() {
 
     if (isMobile) {
         return (
-            <div className="bg-transparent border border-neutral-700 px-4 py-1">
+            <div className="border border-neutral-700 px-4 py-1 glassmorphic">
                 <div className="space-y-1">
                     {/* Top row - Mobile toggles */}
                     <div className="flex items-center justify-center gap-4">
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="gap-2 hover:bg-neutral-700 text-neutral-400"
+                            className="gap-2 hover:bg-neutral-700 text-neutral-400 glassmorphic-dark"
                         >
                             <Users className="w-4 h-4" />
                             {participantCount}
@@ -41,7 +39,7 @@ export default function Controls() {
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="gap-2 hover:bg-neutral-700 text-neutral-400"
+                            className="gap-2 hover:bg-neutral-700 text-neutral-400 glassmorphic-dark"
                         >
                             <MessageSquare className="w-4 h-4" />
                             {chatCount > 0 && (
@@ -54,12 +52,12 @@ export default function Controls() {
                     <div className="flex items-center justify-center gap-3">
                         <TrackToggle
                             source={Track.Source.Microphone}
-                            className="p-2 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
+                            className="p-2 rounded-full transition bg-neutral-600 hover:bg-neutral-500 glassmorphic"
                             showIcon
                         />
                         <TrackToggle
                             source={Track.Source.Camera}
-                            className="p-2 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
+                            className="p-2 rounded-full transition bg-neutral-600 hover:bg-neutral-500 glassmorphic"
                             showIcon
                         />
                         <TrackToggle
@@ -78,16 +76,16 @@ export default function Controls() {
 
     // Desktop layout
     return (
-        <div className="bg-transparent border border-neutral-700 px-2 py-1 w-fit m-auto rounded-xl">
+        <div className="border border-neutral-700 px-2 py-1 w-fit m-auto rounded-xl glassmorphic-dark">
             <div className="flex items-center justify-center gap-8">
                 <TrackToggle
                     source={Track.Source.Microphone}
-                    className="p-3 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
+                    className="p-3 rounded-full transition bg-neutral-600 hover:bg-neutral-500 glassmorphic"
                     showIcon
                 />
                 <TrackToggle
                     source={Track.Source.Camera}
-                    className="p-3 rounded-full transition bg-neutral-600 hover:bg-neutral-500"
+                    className="p-3 rounded-full transition bg-neutral-600 hover:bg-neutral-500 glassmorphic"
                     showIcon
                 />
                 <TrackToggle
@@ -99,12 +97,12 @@ export default function Controls() {
                 <Button
                     variant="secondary"
                     size="sm"
-                    className="rounded-full w-12 h-12 hover:bg-neutral-700 text-neutral-400"
+                    className="rounded-full w-10 h-10 hover:bg-neutral-400 text-neutral-300 bg-neutral-400"
                 >
                     <Hand className="w-5 h-5" />
                 </Button>
 
-                <DisconnectButton className="p-2 rounded-full bg-red-600 hover:bg-red-700 transition">
+                <DisconnectButton className="p-3 rounded-full bg-red-600 hover:bg-red-700 transition">
                     <Phone className="w-5 h-5" />
                 </DisconnectButton>
             </div>

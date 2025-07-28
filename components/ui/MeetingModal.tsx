@@ -161,6 +161,7 @@ const MeetingModal = ({
     <>
       {/* Main Modal */}
       <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogTitle></DialogTitle>
         <DialogContent className="w-full max-w-[520px] bg-neutral-900 text-white px-6 py-8 border-none">
           <h1 className={cn("text-2xl font-bold", className)}>{title}</h1>
 

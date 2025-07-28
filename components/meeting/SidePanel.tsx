@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react"; // Import useEffect and useRef for auto-scroll
 import { useParticipants, useLocalParticipant, useChat } from "@livekit/components-react";
 import { useMeetingStore } from "@/store/useMeetingStore";
 import {
@@ -11,10 +11,20 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Users, MessageSquare, Send, MoreHorizontal, Mic, MicOff, Video, VideoOff, Pin, PinOff } from "lucide-react";
+import {
+    Users,
+    MessageSquare,
+    MoreHorizontal,
+    Mic,
+    MicOff,
+    Video,
+    VideoOff,
+    Pin,
+    PinOff,
+} from "lucide-react";
 import ChatBubble from "../Chat-Bubble";
+import ChatInputBox from "../ChatInputBox";
 
 export default function SidePanel() {
     const participantsLive = useParticipants();
@@ -24,8 +34,17 @@ export default function SidePanel() {
     const { chatMessages, send } = useChat();
     const pinParticipant = useMeetingStore((state) => state.togglePinParticipant);
 
-    const [activeTab, setActiveTab] = useState<"participants" | "chat">("chat");
+    const [activeTab, setActiveTab] = useState<"participants" | "chat">("chat"); // Default to chat as per image
     const [newMessage, setNewMessage] = useState("");
+
+    // Ref for auto-scrolling chat messages
+    const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll effect
+    useEffect(() => {
+        chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatMessages]);
+
 
     const handleSend = () => {
         if (newMessage.trim()) {
@@ -40,71 +59,89 @@ export default function SidePanel() {
             const name = meta.name || p.name || "Unknown";
             const avatar = meta.image || "/defaultProfile.png";
             const isHost = meta.isHost || false;
+            // Use p.sid for unique identification for isPinned and isMuted/isVideoOff checks
             const isPinned = useMeetingStore.getState().pinnedParticipants.some((pp) => pp.id === p.sid);
-            const isMuted = p.isMicrophoneEnabled;
-            const isVideoOff = p.isCameraEnabled;
-            const status = "online";
+            // LiveKit provides direct properties for audio/video status
+            const isMuted = !p.isMicrophoneEnabled; // Invert logic for "isMuted"
+            const isVideoOff = !p.isCameraEnabled; // Invert logic for "isVideoOff"
+
+            // console.log(`Participant ${p.sid} - Name: ${name}, Avatar: ${avatar}, Is Host: ${isHost}, Is Pinned: ${isPinned}, Is Muted: ${isMuted}, Is Video Off: ${isVideoOff}`);
+
+            const status = "online"; // You might get this from LiveKit or other presence data if available
             return { id: p.sid, name, avatar, isHost, isPinned, isMuted, isVideoOff, status };
         })
-        .sort((a, b) => (a.id === localParticipant.sid ? -1 : b.id === localParticipant.sid ? 1 : 0));
+        .sort((a, b) => {
+            // Sort local participant to the top
+            if (a.id === localParticipant.sid) return -1;
+            if (b.id === localParticipant.sid) return 1;
+            return 0; // Maintain original order for others
+        });
+
 
     const pinnedCount = participants.filter((p) => p.isPinned).length;
 
-    const formatTime = (date: Date) =>
-        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    // Helper for formatting time (assuming you have this in '@/lib/utils')
+    const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
 
     return (
-        <div className="w-[320px] min-w-[320px] max-w-[320px] bg-neutral-800 border-l border-neutral-700 flex flex-col h-full sm:flex">
+        <div className="w-[320px] min-w-[320px] max-w-[320px] rounded-2xl overflow-hidden glassmorphic flex flex-col h-full m-1 mt-1"> {/* Applied glassmorphic and rounded corners, margin */}
             <Tabs
                 value={activeTab}
                 onValueChange={(val) => val === 'participants' || val === 'chat' ? setActiveTab(val) : null}
                 className="flex-1 flex flex-col"
             >
-                <div className="border-b border-neutral-700 px-4 py-3">
-                    <TabsList className="grid grid-cols-2 bg-neutral-700 w-full">
-                        <TabsTrigger value="participants" className="text-neutral-200 gap-2 data-[state=active]:bg-neutral-600">
+                {/* Tab Header for Participants and Live Chat */}
+                <div className="p-4 pt-2 pb-2"> {/* Adjusted padding */}
+                    <TabsList className="grid grid-cols-2 bg-neutral-700/50 rounded-lg w-full h-10 border border-neutral-600/50"> {/* Softer background, rounded, border */}
+                        <TabsTrigger value="participants" className="text-neutral-200 gap-2 data-[state=active]:bg-neutral-600/70 data-[state=active]:text-white rounded-md text-sm font-semibold"> {/* Softer active state */}
                             <Users className="w-4 h-4" /> Participants
-                            <Badge variant="secondary" className="ml-1 text-xs bg-neutral-600 text-neutral-200">
+                            <Badge className="ml-1 text-xs bg-neutral-600/70 text-neutral-200 rounded-full h-5 px-2 py-0.5"> {/* Rounded badge */}
                                 {participants.length}
                             </Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="chat" className="text-neutral-200 gap-2 data-[state=active]:bg-neutral-600">
+                        <TabsTrigger value="chat" className="text-neutral-200 gap-2 data-[state=active]:bg-neutral-600/70 data-[state=active]:text-white rounded-md text-sm font-semibold"> {/* Softer active state */}
                             <MessageSquare className="w-4 h-4" /> Live Chat
-                            <Badge variant="secondary" className="ml-1 text-xs bg-neutral-600 text-neutral-200">
+                            <Badge className="ml-1 text-xs bg-neutral-600/70 text-neutral-200 rounded-full h-5 px-2 py-0.5"> {/* Rounded badge */}
                                 {chatMessages.length}
                             </Badge>
                         </TabsTrigger>
                     </TabsList>
                 </div>
 
-                <TabsContent value="participants" className="flex-1 m-0">
-                    <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-700">
-                        <span className="text-sm font-medium text-white">Participants</span>
+                {/* Participants Tab Content */}
+                <TabsContent value="participants" className="flex-1 m-0 flex flex-col"> {/* Added flex flex-col */}
+                    {/* Header for Participants List */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700/50"> {/* Adjusted padding, softer border */}
+                        <span className="text-sm font-semibold text-neutral-200">Participants</span> {/* Changed font-medium to font-semibold, adjusted color */}
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-neutral-400">Pinned: {pinnedCount}/4</span>
-                            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white">
+                            {/* The image doesn't show pinned count like this, but if you want to keep it: */}
+                            {/* <span className="text-xs text-neutral-400">Pinned: {pinnedCount}/4</span> */}
+                            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white hover:bg-neutral-700/50 rounded-full"> {/* Rounded button */}
                                 <MoreHorizontal className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>
 
-                    <ScrollArea className="flex-1">
+                    <ScrollArea className="flex-1"> {/* flex-1 ensures scroll area fills remaining space */}
                         <div className="p-2 space-y-1">
                             {participants.map((p) => (
-                                <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-700">
-                                    <Avatar className="w-8 h-8">
+                                <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg bg-neutral-800/50 hover:bg-neutral-700/60 transition-colors"> {/* Softer background, transition */}
+                                    <Avatar className="w-9 h-9"> {/* Slightly larger avatar */}
                                         <AvatarImage src={p.avatar} />
-                                        <AvatarFallback className="bg-neutral-600 text-white">
+                                        <AvatarFallback className="bg-blue-600 text-white font-bold text-sm"> {/* Changed fallback color/style */}
                                             {p.name.charAt(0)}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm truncate text-white">{p.name}{p.id === localParticipant.sid ? " (You)" : ""}</span>
-                                            {p.isHost && <Badge variant="outline" className="text-xs border-neutral-600 text-neutral-300">Host</Badge>}
-                                            {p.isPinned && <Pin className="w-3 h-3 text-blue-400" />}
+                                            <span className="text-sm truncate font-semibold text-white">{p.name}</span> {/* Font style */}
+                                            {p.id === localParticipant.sid && (
+                                                <Badge className="text-xs bg-neutral-600/70 text-neutral-300 rounded-full px-2 py-0.5 font-normal">You</Badge>
+                                            )}
+                                            {p.isHost && <Badge className="text-xs bg-blue-600 text-white rounded-full px-2 py-0.5 font-normal">Host</Badge>} {/* Host badge style */}
                                         </div>
-                                        <div className="text-xs text-neutral-400 capitalize">{p.status}</div>
+                                        <div className="text-xs text-neutral-400 truncate">{p.id === localParticipant.sid ? `@${localParticipant.identity}` : `@${p.id}`}</div> {/* Display identity as handle */}
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Button
@@ -112,13 +149,13 @@ export default function SidePanel() {
                                             size="sm"
                                             onClick={() => pinParticipant(p.id)}
                                             disabled={!p.isPinned && pinnedCount >= 4}
-                                            className="h-8 w-8 p-0 text-neutral-400 hover:text-white hover:bg-neutral-600"
+                                            className="h-8 w-8 p-0 text-neutral-400 hover:text-white hover:bg-neutral-600/50 rounded-full"
                                             title={p.isPinned ? "Unpin video" : "Pin video"}
                                         >
                                             {p.isPinned ? <PinOff className="w-4 h-4 text-blue-400" /> : <Pin className="w-4 h-4" />}
                                         </Button>
-                                        {p.isMuted ? <MicOff className="w-4 h-4 text-red-400" /> : <Mic className="w-4 h-4 text-green-400" />}
-                                        {p.isVideoOff ? <VideoOff className="w-4 h-4 text-red-400" /> : <Video className="w-4 h-4 text-green-400" />}
+                                        {!p.isMuted ? <Mic className="w-4 h-4 text-neutral-400" /> : <MicOff className="w-4 h-4 text-red-500" />} {/* Icons: use text-neutral-400 for enabled, text-red-500 for muted */}
+                                        {!p.isVideoOff ? <Video className="w-4 h-4 text-neutral-400" /> : <VideoOff className="w-4 h-4 text-red-500" />} {/* Icons: use text-neutral-400 for enabled, text-red-500 for off */}
                                     </div>
                                 </div>
                             ))}
@@ -126,52 +163,66 @@ export default function SidePanel() {
                     </ScrollArea>
                 </TabsContent>
 
+                {/* Live Chat Tab Content */}
                 <TabsContent value="chat" className="flex-1 flex flex-col m-0">
-                    <div className="flex items-center justify-between px-4 border-b border-neutral-700">
-                        <span className="text-sm font-medium text-white">Live Chat</span>
-                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white">
+                    {/* Header for Live Chat */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700/50"> {/* Adjusted padding, softer border */}
+                        <span className="text-sm font-semibold text-neutral-200">Live Chat</span> {/* Changed font-medium to font-semibold, adjusted color */}
+                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white hover:bg-neutral-700/50 rounded-full"> {/* Rounded button */}
                             <MoreHorizontal className="w-4 h-4" />
                         </Button>
                     </div>
-                    <ScrollArea className="flex-1 overflow-hidden px-4 py-1 space-y-4">
-                        {chatMessages.map((msg) => {
-                            // Look up the sender in the live participants list
-                            const participant = participantsLive.find(p => p.identity === msg.from?.identity);
-                            let senderName = msg.from?.name || msg.from?.identity || "Anonymous";
-                            let senderImage = "";
-                            if (participant) {
-                                try {
-                                    const meta = participant.metadata ? JSON.parse(participant.metadata) : {};
-                                    senderName = meta.name || senderName;
-                                    senderImage = meta.image || "";
-                                } catch {
-                                    // ignore parse errors
-                                }
-                            }
-                            const isLocalUser = msg.from?.identity === localParticipant.identity;
-                            return (
-                                <div
-                                    key={msg.id}
-                                    className={`flex overflow-y-auto ${isLocalUser ? "justify-end" : "justify-start"} items-end my-2`}
-                                >
-                                    <ChatBubble senderImage={senderImage} username={isLocalUser ? "You" : senderName} time={formatTime(new Date(msg.timestamp))} message={msg.message} />
-                                </div>
-                            );
-                        })}
-                    </ScrollArea>
-                    <div className="border-t border-neutral-700 p-4">
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="Type a message..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                                className="flex-1 bg-neutral-700 border-neutral-600 text-white placeholder:text-neutral-400"
-                            />
-                            <Button onClick={handleSend} size="icon" className="bg-blue-600 hover:bg-blue-700">
-                                <Send className="w-4 h-4" />
-                            </Button>
-                        </div>
+
+                    {/* Scrollable Message Area */}
+                    {/* The outer div is to ensure flex-1 works correctly for ScrollArea */}
+                    <div className="flex-1 flex flex-col overflow-y-hidden h-full">
+                        <ScrollArea className="px-2 h-[440px]"> {/* flex-1 takes available space for messages */}
+                            <div className="space-y-4 pt-2"> {/* Added pt-2 for top padding */}
+                                {chatMessages.map((msg) => {
+                                    const participant = participantsLive.find(p => p.identity === msg.from?.identity);
+                                    let senderName = msg.from?.name || msg.from?.identity || "Anonymous";
+                                    let senderImage = "";
+                                    const senderHandle = msg.from?.identity || "anonymous";
+
+                                    if (participant) {
+                                        try {
+                                            const meta = participant.metadata ? JSON.parse(participant.metadata) : {};
+                                            senderName = meta.name || senderName;
+                                            senderImage = meta.image || "";
+                                        } catch {
+                                            // ignore parse errors
+                                        }
+                                    }
+                                    const isLocalUser = msg.from?.identity === localParticipant.identity;
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            // Conditional styling for sender and receiver bubbles
+                                            className={`flex ${isLocalUser ? "justify-end" : "justify-start"} items-start`}
+                                        >
+                                            <ChatBubble
+                                                senderImage={senderImage}
+                                                username={isLocalUser ? "You" : senderName}
+                                                userHandle={isLocalUser ? `@${localParticipant.identity}` : `@${senderHandle}`}
+                                                time={formatTime(new Date(msg.timestamp))}
+                                                message={msg.message}
+                                                isLocalUser={isLocalUser} // Pass this for styling within ChatBubble
+                                            />
+                                        </div>
+                                    );
+                                })}
+                                <div ref={chatMessagesEndRef} /> {/* Dummy div for scrolling to the bottom */}
+                            </div>
+                        </ScrollArea>
+                    </div>
+
+                    {/* Fixed Input Box Area - OUTSIDE the ScrollArea but inside TabsContent */}
+                    <div className="flex-shrink-0 p-4 bg-transparent"> {/* Added padding matching image */}
+                        <ChatInputBox
+                            newMessage={newMessage}
+                            setNewMessage={setNewMessage}
+                            onSendMessage={handleSend}
+                        />
                     </div>
                 </TabsContent>
             </Tabs>
