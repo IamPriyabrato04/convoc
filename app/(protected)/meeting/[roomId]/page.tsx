@@ -38,6 +38,8 @@ export default function MeetingRoomPage() {
           setPermissionError("Camera and/or Microphone permission denied. Please enable permissions in your browser settings.");
           return;
         }
+        console.log(process.env.NEXT_PUBLIC_LIVEKIT_URL);
+        
 
         if (!userId) {
           console.error("No userId in store");

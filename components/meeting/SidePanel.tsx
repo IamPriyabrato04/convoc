@@ -41,8 +41,8 @@ export default function SidePanel() {
             const avatar = meta.image || "/defaultProfile.png";
             const isHost = meta.isHost || false;
             const isPinned = useMeetingStore.getState().pinnedParticipants.some((pp) => pp.id === p.sid);
-            const isMuted = p.isMuted;
-            const isVideoOff = p.isCameraOff;
+            const isMuted = p.isMicrophoneEnabled;
+            const isVideoOff = p.isCameraEnabled;
             const status = "online";
             return { id: p.sid, name, avatar, isHost, isPinned, isMuted, isVideoOff, status };
         })
@@ -153,7 +153,7 @@ export default function SidePanel() {
                                 <div
                                     key={msg.id}
                                     className={`flex overflow-y-auto ${isLocalUser ? "justify-end" : "justify-start"} items-end my-2`}
-                                >   
+                                >
                                     <ChatBubble senderImage={senderImage} username={isLocalUser ? "You" : senderName} time={formatTime(new Date(msg.timestamp))} message={msg.message} />
                                 </div>
                             );
