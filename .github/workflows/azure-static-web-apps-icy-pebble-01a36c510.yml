@@ -28,9 +28,9 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "" # Built app content directory - optional
+          app_location: "/" # App source code path (Correct, assuming your Next.js project is in the repo root)
+          api_location: "" # Api source code path - optional (Correct for Next.js API Routes, as SWA finds them in .next)
+          output_location: ".next" # Built app content directory - THIS MUST BE ".next" for Next.js
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
@@ -44,3 +44,9 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_PEBBLE_01A36C510 }}
           action: "close"
+          # For the close_pull_request_job, app_location, api_location, and output_location are often
+          # not strictly necessary as it's just about tearing down a staging environment,
+          # but providing them doesn't hurt. They usually mirror the build_and_deploy_job values.
+          app_location: "/"
+          api_location: ""
+          output_location: ".next" # Best practice to keep consistent if provided

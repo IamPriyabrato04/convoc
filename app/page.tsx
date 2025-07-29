@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
-import { Facebook, Instagram, Linkedin, Twitter, Play, Users, Calendar, ChevronDown } from "lucide-react"
+import { Play, Users, Calendar, ChevronDown } from "lucide-react"
+import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from 'react-icons/fa';
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
@@ -18,7 +19,8 @@ export default function ConvocLanding() {
     }
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -417,8 +419,9 @@ export default function ConvocLanding() {
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-600/50 to-blue-600/50 rounded-full mr-3 transition-all duration-300 group-hover:scale-110 overflow-hidden">
                       <Image
-                        src={`https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 100)}.jpg`}
                         alt="Random person"
+                        // The src is now deterministic based on server-chosen ID
+                        src={`https://randomuser.me/api/portraits/men/${index}.jpg`}
                         height={40}
                         width={40}
                         className="object-cover w-full h-full"
@@ -528,10 +531,10 @@ export default function ConvocLanding() {
           <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <div className="flex space-x-4 mb-4 md:mb-0">
               {[
-                { icon: Facebook, color: "hover:text-blue-400" },
-                { icon: Instagram, color: "hover:text-pink-400" },
-                { icon: Linkedin, color: "hover:text-blue-500" },
-                { icon: Twitter, color: "hover:text-blue-300" },
+                { icon: FaFacebook, color: "hover:text-blue-400" },
+                { icon: FaInstagram, color: "hover:text-pink-400" },
+                { icon: FaLinkedin, color: "hover:text-blue-500" },
+                { icon: FaTwitter, color: "hover:text-blue-300" },
               ].map(({ icon: Icon, color }, index) => (
                 <Link
                   key={index}
