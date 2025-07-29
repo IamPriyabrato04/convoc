@@ -17,12 +17,11 @@ const nextConfig: NextConfig = {
         hostname: "photosnow.org",
       },
       {
-        protocol: 'https',
-        hostname: 'randomuser.me',
+        protocol: "https",
+        hostname: "randomuser.me",
       },
     ],
   },
-  output: "standalone",
 };
 
 export default nextConfig;

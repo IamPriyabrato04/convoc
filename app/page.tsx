@@ -113,7 +113,7 @@ export default function ConvocLanding() {
             </span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto animate-fade-in-up delay-200 leading-relaxed">
-            Convoc Video Calls make it easy to connect with people, no matter how far apart you are. Whether it's
+            Convoc Video Calls make it easy to connect with people, no matter how far apart you are. Whether it&apos;s
             chatting with friends, working with colleagues, or sharing special moments with family.
           </p>
           <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 text-lg rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25 animate-fade-in-up delay-300">
