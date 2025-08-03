@@ -16,8 +16,6 @@ RUN npm ci
 # Copy Prisma schema and migrations
 COPY prisma ./prisma
 
-# Copy .env.production as .env for local build environment
-COPY .env.production .env
 
 # Build the Next.js app (assumes prisma generate is part of build script)
 RUN npm run build
