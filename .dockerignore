@@ -1,0 +1,32 @@
+# Dependency directories
+node_modules
+.npm
+.pnpm-store
+
+# Local build artifacts
+.next
+out
+
+# Git and editor files
+.git
+.gitignore
+.vercel
+.vscode
+
+# Environment variables (CRITICAL: DO NOT INCLUDE YOUR .ENV FILES IN THE IMAGE)
+.env
+.env.local
+.env.example
+.env.development.local
+.env.production.local
+
+# Docker files themselves
+Dockerfile
+.dockerignore
+
+# Other common files to ignore
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+README.md
