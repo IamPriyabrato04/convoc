@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import ChatBubble from "../Chat-Bubble";
 import ChatInputBox from "../ChatInputBox";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+// import MobilePanel from "./MobilePanel";
 
 export default function SidePanel() {
     const participantsLive = useParticipants();
@@ -82,7 +84,25 @@ export default function SidePanel() {
 
     // Helper for formatting time (assuming you have this in '@/lib/utils')
     const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const mobile = useMediaQuery("(max-width: 768px)"); // Adjust breakpoint as needed
+    console.log(mobile);
+    
 
+    // if (mobile) {
+    //     return (
+    //         <MobilePanel
+    //             isOpen={open}
+    //             onClose={onClose}
+    //             participants={participants}
+    //             chatMessages={chatMessages}
+    //             send={send}
+    //             newMessage={newMessage}
+    //             setNewMessage={setNewMessage}
+    //             activeTab={activeTab}
+    //             setActiveTab={setActiveTab}
+    //         />
+    //     );
+    // }
 
     return (
         <div className="w-[320px] min-w-[320px] max-w-[320px] rounded-2xl overflow-hidden glassmorphic flex flex-col h-full m-1 mt-1"> {/* Applied glassmorphic and rounded corners, margin */}
@@ -176,7 +196,7 @@ export default function SidePanel() {
                     {/* Scrollable Message Area */}
                     {/* The outer div is to ensure flex-1 works correctly for ScrollArea */}
                     <div className="flex-1 flex flex-col overflow-y-hidden h-full">
-                        <ScrollArea className="px-2 h-[440px]"> {/* flex-1 takes available space for messages */}
+                        <ScrollArea className="px-2 h-[445px]"> {/* flex-1 takes available space for messages */}
                             <div className="space-y-4 pt-2"> {/* Added pt-2 for top padding */}
                                 {chatMessages.map((msg) => {
                                     const participant = participantsLive.find(p => p.identity === msg.from?.identity);

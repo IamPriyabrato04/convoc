@@ -1,9 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,9 +14,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Using Next.js Metadata API and Viewport export
 export const metadata: Metadata = {
   title: "Convoc",
-  description: "A modern, open-source, and video conferenceing web application",
+  description: "A modern, open-source, and video conferencing web application",
   keywords: [
     "Convoc",
     "video call",
@@ -36,26 +36,24 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Convoc",
-    description: "A modern, open-source, and video conferenceing web application",
+    description: "A modern, open-source, and video conferencing web application",
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+// Define viewport instead of manually adding <meta> in head
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="manifest" href="/manifest.json" />
-        <title></title>
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

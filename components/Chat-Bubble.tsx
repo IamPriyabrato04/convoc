@@ -11,7 +11,7 @@ interface ChatBubbleProps {
     isLocalUser: boolean; // Prop to determine if it's "You" for styling
 }
 
-export default function ChatBubble({ senderImage, username, userHandle, time, message, isLocalUser }: ChatBubbleProps) {
+export default function ChatBubble({ senderImage, username, time, message, isLocalUser }: ChatBubbleProps) {
     return (
         <div className={`flex flex-col max-w-[calc(100%-1rem)] ${isLocalUser ? "items-end" : "items-start"}`}>
             <div className={`flex items-center gap-x-2 pb-1 ${isLocalUser ? "flex-row-reverse" : "flex-row"}`}>
@@ -20,7 +20,7 @@ export default function ChatBubble({ senderImage, username, userHandle, time, me
                     <Avatar className="w-6 h-6 shrink-0"> {/* Slightly larger avatar than 4x4 */}
                         <AvatarImage src={senderImage} alt={username} />
                         <AvatarFallback className={`${isLocalUser ? "bg-blue-600" : "bg-neutral-600"} text-white text-xs font-semibold`}>
-                            {username.charAt(0)}
+                            {/* {username.charAt(0)} */}
                         </AvatarFallback>
                     </Avatar>
                 )}
@@ -28,7 +28,7 @@ export default function ChatBubble({ senderImage, username, userHandle, time, me
                     <span className="text-sm font-semibold text-neutral-200"> {/* Increased font size and changed color to match image */}
                         {username}
                     </span>
-                    {userHandle}
+                    {/* {userHandle} */}
                 </div>
             </div>
 

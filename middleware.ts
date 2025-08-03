@@ -1,43 +1,35 @@
-export const runtime = "nodejs";
-import authConfig from "./auth.config"
-import NextAuth from "next-auth"
-import {
-    DEFAULT_LOGIN_REDIRECT,
-    publicRoute,
-    authRoutes,
-    apiAuthPrefix
-} from "@/routes"
-const { auth } = NextAuth(authConfig)
+import { NextRequest, NextResponse } from "next/server";
+import { authRoutes, publicRoute, apiAuthPrefix, DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { getToken } from "next-auth/jwt";
 
-export default auth((req) => {
-    const { nextUrl } = req;
-    const isLoggedIn = !!req.auth;
+export async function middleware(req: NextRequest) {
+    const { pathname } = req.nextUrl;
+    const token = await getToken({
+        req,
+        secret: process.env.AUTH_SECRET,
+    });
 
-    const isPublicRoute = publicRoute.includes(nextUrl.pathname);
-    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+    const isAuthRoute = authRoutes.includes(pathname);
+    const isPublicRoute = publicRoute.includes(pathname);
+    const isApiAuthRoute = pathname.startsWith(apiAuthPrefix);
 
-    if (isApiAuthRoute) {
-        return;
+    if (isApiAuthRoute) return NextResponse.next();
+
+    // Already logged in —> block auth pages
+    if (isAuthRoute && token) {
+        return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, req.url));
     }
-    if (isAuthRoute) {
-        if (isLoggedIn) {
-            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-        }
-        return;
+
+    // Not logged in —> block private routes
+    if (!isPublicRoute && !token && !isAuthRoute) {
+        return NextResponse.redirect(new URL("/auth/login", req.url));
     }
-    if (!isLoggedIn && !isPublicRoute) {
-        return Response.redirect(new URL(`/auth/login`, nextUrl))
-    }
-    return;
-});
+
+    return NextResponse.next();
+}
 
 export const config = {
     matcher: [
-        // Updated matcher to explicitly include 'json' in the skipped file types
-        // This regex now skips Next.js internals and all common static files including .json
-        '/((?!_next|[^?]*\\.(?:html?|css|js|json|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-        // Always run for API routes
-        '/(api|trpc)(.*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2)).*)',
     ],
-}
+};

@@ -1,4 +1,5 @@
 // app/meeting-room/[roomId]/layout.tsx
+"use client"
 
 export default function RoomLayout({ children }: { children: React.ReactNode }) {
     return (

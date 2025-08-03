@@ -72,9 +72,9 @@ export default function MobilePanel({
                     <SheetHeader className="border-b border-neutral-700 p-4">
                         <div className="flex items-center justify-between">
                             <SheetTitle className="text-lg font-semibold">Meeting Info</SheetTitle>
-                            <Button variant="ghost" size="icon" onClick={onClose} className="text-neutral-400 hover:text-white">
+                            {/* <Button variant="ghost" size="icon" onClick={onClose} className="text-neutral-400 hover:text-white">
                                 <X className="w-5 h-5" />
-                            </Button>
+                            </Button> */}
                         </div>
                     </SheetHeader>
 
