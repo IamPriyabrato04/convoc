@@ -1,0 +1,39 @@
+name: convoc-azure-container-app
+description: Build and deploy a Docker image to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure CLI Setup
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az acr login --name ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE=${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ secrets.IMAGE_NAME }}:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
+
+      - name: Deploy to Azure Container App
+        run: |
+          az containerapp update \
+            --name ${{ secrets.CONTAINER_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ secrets.AZURE_CONTAINER_REGISTRY }}/${{ secrets.IMAGE_NAME }}:latest
