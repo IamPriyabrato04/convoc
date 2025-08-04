@@ -31,15 +31,21 @@ export default function MeetingRoomPage() {
   useEffect(() => {
     const checkPermissionsAndFetchToken = async () => {
       try {
+        console.log("Checking camera/microphone permissions...");
+
         const camPerm = await navigator.permissions.query({ name: "camera" as PermissionName });
         const micPerm = await navigator.permissions.query({ name: "microphone" as PermissionName });
+
+        console.log("Camera permission:", camPerm.state);
+        console.log("Microphone permission:", micPerm.state);
+
 
         if (camPerm.state === "denied" || micPerm.state === "denied") {
           setPermissionError("Camera and/or Microphone permission denied. Please enable permissions in your browser settings.");
           return;
         }
         console.log(process.env.NEXT_PUBLIC_LIVEKIT_URL);
-        
+
 
         if (!userId) {
           console.error("No userId in store");
@@ -75,6 +81,8 @@ export default function MeetingRoomPage() {
 
     if (roomId && userId) {
       checkPermissionsAndFetchToken();
+    } else {
+      console.log("Waiting for roomId or userId...", { roomId, userId });
     }
   }, [roomId, userId, isOwner, allowedToJoin]);
 
@@ -108,6 +116,14 @@ export default function MeetingRoomPage() {
         <SkeletonLoader />
       </div>
     );
+  }
+
+  const serverUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+
+  if (!serverUrl) {
+    console.log("⚠️ Missing NEXT_PUBLIC_LIVEKIT_URL in env. LiveKit may not connect.");
+  } else {
+    console.log("LiveKit server URL:", serverUrl);
   }
 
   return (

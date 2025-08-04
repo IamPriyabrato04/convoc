@@ -20,8 +20,6 @@ import {
     MicOff,
     Video,
     VideoOff,
-    Pin,
-    PinOff,
 } from "lucide-react";
 import ChatBubble from "../Chat-Bubble";
 import ChatInputBox from "../ChatInputBox";
@@ -34,7 +32,6 @@ export default function SidePanel() {
 
     // useChat from LiveKit for real-time chat
     const { chatMessages, send } = useChat();
-    const pinParticipant = useMeetingStore((state) => state.togglePinParticipant);
 
     const [activeTab, setActiveTab] = useState<"participants" | "chat">("chat"); // Default to chat as per image
     const [newMessage, setNewMessage] = useState("");
@@ -80,7 +77,7 @@ export default function SidePanel() {
         });
 
 
-    const pinnedCount = participants.filter((p) => p.isPinned).length;
+    // const pinnedCount = participants.filter((p) => p.isPinned).length;
 
     // Helper for formatting time (assuming you have this in '@/lib/utils')
     const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -105,7 +102,7 @@ export default function SidePanel() {
     // }
 
     return (
-        <div className="w-[320px] min-w-[320px] max-w-[320px] rounded-2xl overflow-hidden glassmorphic flex flex-col h-full m-1 mt-1"> {/* Applied glassmorphic and rounded corners, margin */}
+        <div className="w-[370px] min-w-[320px] max-w-[330px] rounded-2xl overflow-hidden glassmorphic flex flex-col h-full m-1 mt-1"> {/* Applied glassmorphic and rounded corners, margin */}
             <Tabs
                 value={activeTab}
                 onValueChange={(val) => val === 'participants' || val === 'chat' ? setActiveTab(val) : null}
@@ -116,13 +113,13 @@ export default function SidePanel() {
                     <TabsList className="grid grid-cols-2 bg-neutral-700/50 rounded-lg w-full h-10 border border-neutral-600/50"> {/* Softer background, rounded, border */}
                         <TabsTrigger value="participants" className="text-neutral-200 gap-2 data-[state=active]:bg-neutral-600/70 data-[state=active]:text-white rounded-md text-sm font-semibold"> {/* Softer active state */}
                             <Users className="w-4 h-4" /> Participants
-                            <Badge className="ml-1 text-xs bg-neutral-600/70 text-neutral-200 rounded-full h-5 px-2 py-0.5"> {/* Rounded badge */}
+                            <Badge className="ml-1 text-xs bg-sky-800 text-neutral-200 rounded-full h-5 px-2 py-0.5"> {/* Rounded badge */}
                                 {participants.length}
                             </Badge>
                         </TabsTrigger>
                         <TabsTrigger value="chat" className="text-neutral-200 gap-2 data-[state=active]:bg-neutral-600/70 data-[state=active]:text-white rounded-md text-sm font-semibold"> {/* Softer active state */}
                             <MessageSquare className="w-4 h-4" /> Live Chat
-                            <Badge className="ml-1 text-xs bg-neutral-600/70 text-neutral-200 rounded-full h-5 px-2 py-0.5"> {/* Rounded badge */}
+                            <Badge className="ml-1 text-xs bg-sky-800 text-neutral-200 rounded-full h-5 px-2 py-0.5"> {/* Rounded badge */}
                                 {chatMessages.length}
                             </Badge>
                         </TabsTrigger>
@@ -144,36 +141,26 @@ export default function SidePanel() {
                     </div>
 
                     <ScrollArea className="flex-1"> {/* flex-1 ensures scroll area fills remaining space */}
-                        <div className="p-2 space-y-1">
+                        <div className="p-1 space-y-1">
                             {participants.map((p) => (
-                                <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg bg-neutral-800/50 hover:bg-neutral-700/60 transition-colors"> {/* Softer background, transition */}
-                                    <Avatar className="w-9 h-9"> {/* Slightly larger avatar */}
+                                <div key={p.id} className="flex items center gap-2 py-2 rounded-lg bg-neutral-800/50 hover:bg-neutral-700/60 transition-colors border border-neutral-700"> {/* Softer background, transition */}
+                                    <Avatar className="w-8 h-8"> {/* Slightly larger avatar */}
                                         <AvatarImage src={p.avatar} />
                                         <AvatarFallback className="bg-blue-600 text-white font-bold text-sm"> {/* Changed fallback color/style */}
                                             {p.name.charAt(0)}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
+                                    <div className="flex-1 w-0">
+                                        <div className="flex items-center gap-2 pl-1">
                                             <span className="text-sm truncate font-semibold text-white">{p.name}</span> {/* Font style */}
                                             {p.id === localParticipant.sid && (
-                                                <Badge className="text-xs bg-neutral-600/70 text-neutral-300 rounded-full px-2 py-0.5 font-normal">You</Badge>
+                                                <Badge className="text-xs bg-neutral-600/70 text-neutral-300 rounded-full px-1 py-0 font-normal">You</Badge>
                                             )}
-                                            {p.isHost && <Badge className="text-xs bg-blue-600 text-white rounded-full px-2 py-0.5 font-normal">Host</Badge>} {/* Host badge style */}
+                                            {p.isHost && <Badge className="text-xs bg-blue-600 text-white rounded-full px-1 font-normal">Host</Badge>} {/* Host badge style */}
                                         </div>
-                                        <div className="text-xs text-neutral-400 truncate">{p.id === localParticipant.sid ? `@${localParticipant.identity}` : `@${p.id}`}</div> {/* Display identity as handle */}
+                                        {/* <div className="text-xs text-neutral-400 truncate">{p.id === localParticipant.sid ? `@${localParticipant.identity}` : `@${p.id}`}</div> Display identity as handle */}
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => pinParticipant(p.id)}
-                                            disabled={!p.isPinned && pinnedCount >= 4}
-                                            className="h-8 w-8 p-0 text-neutral-400 hover:text-white hover:bg-neutral-600/50 rounded-full"
-                                            title={p.isPinned ? "Unpin video" : "Pin video"}
-                                        >
-                                            {p.isPinned ? <PinOff className="w-4 h-4 text-blue-400" /> : <Pin className="w-4 h-4" />}
-                                        </Button>
+                                    <div className="flex items-center gap-3 pr-3">
                                         {!p.isMuted ? <Mic className="w-4 h-4 text-neutral-400" /> : <MicOff className="w-4 h-4 text-red-500" />} {/* Icons: use text-neutral-400 for enabled, text-red-500 for muted */}
                                         {!p.isVideoOff ? <Video className="w-4 h-4 text-neutral-400" /> : <VideoOff className="w-4 h-4 text-red-500" />} {/* Icons: use text-neutral-400 for enabled, text-red-500 for off */}
                                     </div>
