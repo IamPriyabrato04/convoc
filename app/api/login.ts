@@ -9,7 +9,6 @@ import { AuthError } from "next-auth";
 
 
 export const login = async (values: z.infer<typeof loginSchema>) => {
-    console.log("Login values:", values);
     const valuidatedFields = loginSchema.safeParse(values);
 
 

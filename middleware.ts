@@ -7,7 +7,13 @@ export async function middleware(req: NextRequest) {
     const token = await getToken({
         req,
         secret: process.env.AUTH_SECRET,
+        secureCookie: true, // important for production
+        cookieName: process.env.NODE_ENV === "production"
+            ? "__Secure-authjs.session-token"
+            : "authjs.session-token"
     });
+    console.log(token);
+
 
     const isAuthRoute = authRoutes.includes(pathname);
     const isPublicRoute = publicRoute.includes(pathname);

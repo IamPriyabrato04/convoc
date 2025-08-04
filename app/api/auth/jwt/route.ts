@@ -1,5 +1,3 @@
-// app/api/auth/jwt/route.ts 👈 note the file path and filename
-
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
@@ -14,9 +12,14 @@ export async function GET() {
     }
 
     const token = jwt.sign(
-        { userId: session.user.id, name: session.user.name },
+        {
+            userId: session.user.id,
+            name: session.user.name
+        },
         process.env.JWT_SECRET!,
-        { expiresIn: "7d" }
+        {
+            expiresIn: "7d"
+        }
     );
 
     return NextResponse.json({ token });

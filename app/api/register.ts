@@ -8,7 +8,6 @@ import { db } from "@/lib/db";
 
 
 export const register = async (values: z.infer<typeof registerSchema>) => {
-    console.log("Registration values:", values);
     const valuidatedFields = registerSchema.safeParse(values);
 
     if (!valuidatedFields.success) {
@@ -34,5 +33,5 @@ export const register = async (values: z.infer<typeof registerSchema>) => {
         },
     })
 
-    return { success: "User created" };
+    return { success: "Registration Successful" };
 }
