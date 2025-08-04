@@ -14,36 +14,49 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Using Next.js Metadata API and Viewport export
+// SEO Metadata
 export const metadata: Metadata = {
-  title: "Convoc",
-  description: "A modern, open-source, and video conferencing web application",
-  keywords: [
-    "Convoc",
-    "video call",
-    "video conferencing",
-    "self-hosted",
-    "open-source",
-    "alternative to Discord",
-    "modern communication",
-    "real-time collaboration",
-    "video calls",
-    "chat application",
-    "community platform",
-    "secure communication",
-    "self-hosted video conferencing",
-    "open-source video calls",
-  ],
+  title: 'Convoc | Free Secure Video Meetings & Screen Sharing',
+  description:
+    'Host HD video calls, real-time screen sharing, group chat, and file sharing with Convoc — the modern, secure alternative to Zoom, Google Meet, and Skype.',
   openGraph: {
-    title: "Convoc",
-    description: "A modern, open-source, and video conferencing web application",
+    title: 'Convoc | Free Secure Video Meetings & Screen Sharing',
+    description:
+      'Experience fast, secure, and high-quality video conferencing with Convocs. No installs required. Just click and meet.',
+    url: 'https://convoc.live',
+    siteName: 'Convocs',
+    images: [
+      {
+        url: 'https://convoc.live/convoc.png',
+        width: 1200,
+        height: 630,
+        alt: 'Convocs - Free Secure Video Meetings App',
+      },
+    ],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Convoc | Free Secure Video Meetings & Screen Sharing',
+    description:
+      'Switch to Convoc for fast, reliable, and private video calls. Perfect for teams, remote work, and online classes.',
+    images: ['https://convoc.live/convoc.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
-// Define viewport instead of manually adding <meta> in head
+
+
+// Viewport
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

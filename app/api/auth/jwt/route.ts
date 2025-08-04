@@ -16,7 +16,7 @@ export async function GET() {
     const token = jwt.sign(
         { userId: session.user.id, name: session.user.name },
         process.env.JWT_SECRET!,
-        { expiresIn: "1d" }
+        { expiresIn: "7d" }
     );
 
     return NextResponse.json({ token });
