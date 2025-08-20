@@ -9,7 +9,6 @@ import { Loader2 } from "lucide-react";
 import { useMeetingStore } from "@/store/useMeetingStore";
 import { useUserStore } from "@/store/useUserStore";
 import SidePanel from "@/components/meeting/SidePanel";
-import SummaryPanel from "@/components/meeting/SummaryPannel";
 import SkeletonLoader from "@/components/SkeletonLoader";
 
 export default function MeetingRoomPage() {
@@ -44,7 +43,6 @@ export default function MeetingRoomPage() {
           setPermissionError("Camera and/or Microphone permission denied. Please enable permissions in your browser settings.");
           return;
         }
-        console.log(process.env.NEXT_PUBLIC_LIVEKIT_URL);
 
 
         if (!userId) {
@@ -118,7 +116,7 @@ export default function MeetingRoomPage() {
     );
   }
 
-  const serverUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+  const serverUrl = "https://livekit.convoc.live";
 
   if (!serverUrl) {
     console.log("⚠️ Missing NEXT_PUBLIC_LIVEKIT_URL in env. LiveKit may not connect.");
@@ -129,7 +127,7 @@ export default function MeetingRoomPage() {
   return (
     <LiveKitRoom
       token={token}
-      serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
+      serverUrl={"https://livekit.convoc.live"}
       connect
       onDisconnected={() => router.push("/dashboard")}
       audio={true} video={true}
@@ -140,11 +138,7 @@ export default function MeetingRoomPage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Video Area */}
           <div className="flex-1 flex flex-col">
-            <div className="flex-1 p-2 md:p-4">
-              <VideoStage />
-            </div>
-
-            <SummaryPanel />
+            <VideoStage />
           </div>
           <SidePanel />
         </div>

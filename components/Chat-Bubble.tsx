@@ -1,6 +1,6 @@
 import { CheckCheck } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import React from "react"; // Explicitly import React
+import React from "react";
 
 interface ChatBubbleProps {
     senderImage?: string; // Made optional as per image (some messages don't have avatar)
@@ -28,7 +28,6 @@ export default function ChatBubble({ senderImage, username, time, message, isLoc
                     <span className="text-sm font-semibold text-neutral-200"> {/* Increased font size and changed color to match image */}
                         {username}
                     </span>
-                    {/* {userHandle} */}
                 </div>
             </div>
 
@@ -41,10 +40,9 @@ export default function ChatBubble({ senderImage, username, time, message, isLoc
             </p>
 
             <div className={`flex items-center gap-x-2 pt-1 ${isLocalUser ? "justify-end" : "justify-start"}`}>
-                {/* Assuming CheckCheck is for message status, like "Delivered" */}
-                {isLocalUser && ( // Only show delivered status for local user's messages
+                {isLocalUser && (
                     <div className="flex gap-x-1 items-center">
-                        <CheckCheck className="w-3 h-3 text-blue-400" /> {/* Smaller icon */}
+                        <CheckCheck className="w-3 h-3 text-blue-400" />
                         <span className="text-[10px] font-light text-neutral-400">
                             Delivered
                         </span>

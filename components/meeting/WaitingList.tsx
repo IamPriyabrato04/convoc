@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, memo } from "react"; // Added useCallback, memo
+import { useEffect, useState, useCallback, memo } from "react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, X, Users, ChevronDown, UserRound } from "lucide-react"; // UserRound for fallback avatar
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Assuming you have Avatar component
+import { Loader2, Check, X, Users, ChevronDown, UserRound } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type UserType = {
     id: string;
@@ -19,11 +19,10 @@ type UserType = {
 };
 
 type ParticipantType = {
-    id: string; // This should ideally be LiveKit participant SID or a unique ID from your backend
+    id: string;
     user: UserType;
 };
 
-// Memoized component for individual pending participants
 const PendingParticipantItem = memo(function PendingParticipantItem({
     participant,
     isLoading,
@@ -39,31 +38,29 @@ const PendingParticipantItem = memo(function PendingParticipantItem({
     const displayImage = participant.user?.image || "";
 
     return (
-        <div
-            className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50 hover:bg-neutral-700/60 transition-colors mb-1 last:mb-0" // Adjusted background, hover, rounded, margin
-        >
+        <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50 hover:bg-neutral-700/60 transition-colors mb-1 last:mb-0">
             {isLoading ? (
-                <div className="flex justify-center items-center w-full py-1"> {/* Added py-1 for consistent height */}
-                    <Loader2 className="w-5 h-5 animate-spin text-blue-400" /> {/* Changed loader color */}
+                <div className="flex justify-center items-center w-full py-1">
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
                 </div>
             ) : (
                 <>
                     <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8"> {/* Larger avatar */}
+                        <Avatar className="w-8 h-8">
                             <AvatarImage src={displayImage} alt={displayName} />
                             <AvatarFallback className="bg-neutral-600 text-white font-bold text-xs">
-                                {displayName.charAt(0).toUpperCase() || <UserRound className="w-4 h-4" />} {/* Fallback to UserRound icon */}
+                                {displayName.charAt(0).toUpperCase() || <UserRound className="w-4 h-4" />}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm text-neutral-100 font-medium truncate"> {/* Adjusted text color, font, truncate */}
+                        <span className="text-sm text-neutral-100 font-medium truncate">
                             {displayName}
                         </span>
                     </div>
-                    <div className="flex gap-2 shrink-0"> {/* Added shrink-0 to prevent buttons from squishing */}
+                    <div className="flex gap-2 shrink-0">
                         <Button
                             onClick={() => onApprove(participant.id)}
                             size="icon"
-                            className="w-8 h-8 bg-green-600 hover:bg-green-700 rounded-full transition-colors" // Adjusted size, color, rounded
+                            className="w-8 h-8 bg-green-600 hover:bg-green-700 rounded-full"
                             title="Approve"
                         >
                             <Check className="w-4 h-4" />
@@ -71,7 +68,7 @@ const PendingParticipantItem = memo(function PendingParticipantItem({
                         <Button
                             onClick={() => onReject(participant.id)}
                             size="icon"
-                            className="w-8 h-8 bg-red-600 hover:bg-red-700 rounded-full transition-colors" // Adjusted size, color, rounded
+                            className="w-8 h-8 bg-red-600 hover:bg-red-700 rounded-full"
                             title="Reject"
                         >
                             <X className="w-4 h-4" />
@@ -83,7 +80,6 @@ const PendingParticipantItem = memo(function PendingParticipantItem({
     );
 });
 
-
 export default function WaitingList({
     roomId,
     isOwner,
@@ -93,49 +89,55 @@ export default function WaitingList({
 }) {
     const [pendingList, setPendingList] = useState<ParticipantType[]>([]);
     const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown visibility
 
-    // Use useCallback to memoize action handlers for performance
-    const handleApprove = useCallback(async (id: string) => {
-        setLoadingId(id);
-        try {
-            const res = await fetch(`/api/meetings/${roomId}/approve`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ participantId: id }),
-            });
-            if (res.ok) {
-                // Optimistically update UI or re-fetch to ensure consistency
-                setPendingList(prev => prev.filter(p => p.id !== id));
-            } else {
-                console.error("Failed to approve participant:", await res.text());
+    const handleApprove = useCallback(
+        async (id: string) => {
+            setLoadingId(id);
+            try {
+                const res = await fetch(`/api/meetings/${roomId}/approve`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ participantId: id }),
+                });
+                if (res.ok) {
+                    setPendingList(prev => prev.filter(p => p.id !== id));
+                    setDropdownOpen(false); // close dropdown
+                } else {
+                    console.error("Failed to approve participant:", await res.text());
+                }
+            } catch (error) {
+                console.error("Failed to approve participant:", error);
+            } finally {
+                setLoadingId(null);
             }
-        } catch (error) {
-            console.error("Failed to approve participant:", error);
-        } finally {
-            setLoadingId(null);
-        }
-    }, [roomId]); // Depend on roomId
+        },
+        [roomId]
+    );
 
-    const handleReject = useCallback(async (id: string) => {
-        setLoadingId(id);
-        try {
-            const res = await fetch(`/api/meetings/${roomId}/reject`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ participantId: id }),
-            });
-            if (res.ok) {
-                // Optimistically update UI or re-fetch to ensure consistency
-                setPendingList(prev => prev.filter(p => p.id !== id));
-            } else {
-                console.error("Failed to reject participant:", await res.text());
+    const handleReject = useCallback(
+        async (id: string) => {
+            setLoadingId(id);
+            try {
+                const res = await fetch(`/api/meetings/${roomId}/reject`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ participantId: id }),
+                });
+                if (res.ok) {
+                    setPendingList(prev => prev.filter(p => p.id !== id));
+                    setDropdownOpen(false); // ✅ close dropdown
+                } else {
+                    console.error("Failed to reject participant:", await res.text());
+                }
+            } catch (error) {
+                console.error("Failed to reject participant:", error);
+            } finally {
+                setLoadingId(null);
             }
-        } catch (error) {
-            console.error("Failed to reject participant:", error);
-        } finally {
-            setLoadingId(null);
-        }
-    }, [roomId]); // Depend on roomId
+        },
+        [roomId]
+    );
 
     useEffect(() => {
         if (!isOwner) return;
@@ -143,32 +145,29 @@ export default function WaitingList({
         const fetchPending = async () => {
             try {
                 const res = await fetch(`/api/meetings/${roomId}/pending`);
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 setPendingList(data.participants || []);
             } catch (error) {
                 console.error("Failed to fetch pending participants:", error);
-                setPendingList([]); // Clear list on error
+                setPendingList([]);
             }
         };
 
-        // Fetch immediately and then set up interval
         fetchPending();
-        const interval = setInterval(fetchPending, 5000); // Poll every 5 seconds
-
+        const interval = setInterval(fetchPending, 5000);
         return () => clearInterval(interval);
-    }, [isOwner, roomId]); // Dependencies for useEffect
+    }, [isOwner, roomId]);
 
     if (!isOwner) return null;
 
     return (
-        <DropdownMenu>
+        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
                 <Button
-                    variant="secondary" // Use a shadcn variant or custom to better integrate
-                    className="flex items-center gap-2 px-4 py-1 text-white bg-neutral-600 hover:bg-neutral-700 rounded-full transition-all duration-200 shadow-lg" // More prominent button
+                    variant="secondary"
+                    onClick={() => setDropdownOpen(true)}
+                    className="flex items-center gap-2 px-4 py-1 text-white bg-neutral-600 hover:bg-neutral-700 rounded-full shadow-lg"
                 >
                     <Users className="w-5 h-5" />
                     <span className="font-medium text-base">Waiting List</span>
@@ -182,18 +181,26 @@ export default function WaitingList({
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
-                // Apply glassmorphic class here
-                className="glassmorphic-dark border-neutral-700/50 rounded-lg p-4 mt-2 shadow-2xl space-y-3" // Glassmorphic, softer border, more padding, larger shadow, space between elements
-                align="end"
-            >
-                <h3 className="text-xl font-bold text-neutral-100 mb-2 border-b border-neutral-700/50 pb-2"> {/* Larger, bolder title, subtle bottom border */}
+                className="relative glassmorphic-dark border-neutral-700/50 rounded-lg p-4 mt-2 shadow-2xl space-y-3" align="end">
+                {/* Close button */}
+                <Button
+                    onClick={() => setDropdownOpen(false)}
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 text-neutral-400 hover:text-red-500"
+                    title="Close"
+                >
+                    <X className="w-8 h-8 text-red-700 font-extrabold" />
+                </Button>
+
+                <h3 className="text-xl font-bold text-neutral-100 mb-2 border-b border-neutral-700/50 pb-2">
                     Waiting List ({pendingList.length})
                 </h3>
 
-                <ScrollArea className="h-[300px] rounded-lg border border-neutral-700/50 p-2"> {/* Adjusted border, padding, rounded */}
+                <ScrollArea className="h-[100px] rounded-lg border border-neutral-700/50 p-2">
                     {pendingList.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full min-h-[150px] text-center text-neutral-400"> {/* Centered message for no requests */}
-                            <Users className="w-10 h-10 mb-2 opacity-50" />
+                        <div className="flex flex-col items-center justify-center h-full min-h-[70px] text-center text-neutral-400">
+                            <Users className="w-8 h-8 mb-1 opacity-50" />
                             <p className="text-lg">No pending requests</p>
                             <p className="text-sm">New participants will appear here.</p>
                         </div>
