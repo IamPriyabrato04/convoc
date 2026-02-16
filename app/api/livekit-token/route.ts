@@ -43,7 +43,7 @@
 import { auth } from "@/auth";
 import jwt from "jsonwebtoken";
 
-export async function POST(req: Request, { params }: { params: { room: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ room: string }> }) {
   try {
     const session = await auth();
     if (!session) {
@@ -55,7 +55,7 @@ export async function POST(req: Request, { params }: { params: { room: string } 
       return new Response(JSON.stringify({ error: "User id not found in session" }), { status: 400 });
     }
 
-    const room = params.room;
+    const room = (await params)?.room;
     if (!room) {
       return new Response(JSON.stringify({ error: "room required" }), { status: 400 });
     }
