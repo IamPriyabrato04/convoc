@@ -30,8 +30,6 @@ export default function MeetingRoomPage() {
   useEffect(() => {
     const checkPermissionsAndFetchToken = async () => {
       try {
-        console.log("Checking camera/microphone permissions...");
-
         const camPerm = await navigator.permissions.query({ name: "camera" as PermissionName });
         const micPerm = await navigator.permissions.query({ name: "microphone" as PermissionName });
 
@@ -116,10 +114,10 @@ export default function MeetingRoomPage() {
     );
   }
 
-  const serverUrl = "https://livekit.convoc.live";
+  const serverUrl = process.env.SERVER_URL;
 
   if (!serverUrl) {
-    console.log("⚠️ Missing NEXT_PUBLIC_LIVEKIT_URL in env. LiveKit may not connect.");
+    console.log("⚠️ Missing SERVER_URL in env. LiveKit may not connect.");
   } else {
     console.log("LiveKit server URL:", serverUrl);
   }
